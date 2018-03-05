@@ -3,21 +3,43 @@
 
 #include <string>
 
-using namespace std;
-
 class AVL {
 
- private:
+    private: 
 
- 	struct Node
- 	{
- 		int value;
- 		Node* right;
- 		Node* left;
+        struct Node
+		{
+			//struct Node(string word) : word(word), count(0), right(NULL), left(NULL) {}
 
- 	};
+			std::string word;
+			int count;
+			struct Node* right;
+			struct Node* left;
 
- public:
+		};
+		struct Node * root;
+    
+    public:
+        //constructor
+        AVL(void);
 
+        //destructor
+	    ~AVL();
+        void destroyRecursive(Node* node);
 
-}
+        //search functions
+	    struct Node * search(std::string word);
+        struct Node * searchHelper(struct Node* root, std::string word);
+
+        //utility functions
+        struct Node* rotateLeft(Node* y);
+        struct Node* rotateRight(Node* y);
+        int height(Node* root);
+
+        //insert functions
+        struct Node* insert(std::string word);
+        struct Node* insert(Node* root, std::string word);
+
+};
+
+#endif
