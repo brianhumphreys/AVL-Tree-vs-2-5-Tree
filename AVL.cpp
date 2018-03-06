@@ -1,5 +1,12 @@
 #include <string>
 #include "AVL.h"
+#include <string>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <algorithm>
+#include <vector>
+#include <dirent.h>
 
 using namespace std;
 
@@ -17,13 +24,13 @@ AVL::~AVL()
     destroyRecursive(root);
 }
 
-void AVL::destroyRecursive(Node* node)
+void AVL::destroyRecursive(Node* Node)
 {
-    if (node)
+    if (Node)
     {
-        destroyRecursive(node->left);
-        destroyRecursive(node->right);
-        delete node;
+        destroyRecursive(Node->left);
+        destroyRecursive(Node->right);
+        delete Node;
     }
 }
 
@@ -80,6 +87,43 @@ struct AVL::Node* AVL::rotateRight(Node* y) {
     return x;
 }
 
+struct AVL::Node* AVL::rotationMaker(Node* x, string word)
+{
+
+    int balance = height(x->left) - height(x->right);
+    //Now to perform Rotation Operations
+    //CASE 1: LEFT LEFT
+    if(balance > 1 && word < x->left->word) 
+        return rotateRight(x);
+
+    //CASE 2: LEFT RIGHT
+     if (balance > 1 && word > x->left->word)
+    {
+        x->left =  rotateLeft(x->left);
+        return rotateRight(x);
+    }
+
+    //CASE 3: RIGHT LEFT
+     if (balance < -1 && word < x->right->word)
+    {
+        x->right = rotateRight(x->right);
+        return rotateLeft(x);
+    }
+
+    //CASE 4: RIGHT RIGHT
+     if (balance < -1 && word > x->right->word)
+        return rotateLeft(x);
+}
+
+bool AVL::isBalance(Node* x)
+{
+    int balance = height(x->left) - height(x->right);
+    if(balance == 1 || 0 || -1)
+        return true;
+    else
+        return false;
+}
+
 struct AVL::Node* AVL::insert(string word) {
     return insert(root, word);
 
@@ -89,44 +133,220 @@ struct AVL::Node* AVL::insert(Node* root, string word) {
 
     if(word < root->word)
     {
-        nodeCount += 1;
-        if(root->leftChild != NULL)
-            insert(word, root->leftChild);
+        root->count += 1;
+        if(root->left != NULL)
+            insert(root->left, word);
         else
         {
-            root->leftChild = new node;
-            root->leftChild->word = word;
-            root->leftChild->count = 1;
-            root->leftChild->leftChild = NULL;    //Sets the leftChild child of the child node to null
-            root->leftChild->rightChild = NULL;   //Sets the rightChild child of the child node to null
+            root->left = new Node(word);
         }  
     }
     else if(word > root->word)
     {
-        nodeCount += 1;
-        if(root->rightChild != NULL)
-            insert(word, root->rightChild);
+        root->count += 1;
+        if(root->right != NULL)
+            insert(root->right, word);
         else
         {
-            root->rightChild = new node;
-            root->rightChild->word = word;
-            root->rightChild->count = 1;
-            root->rightChild->leftChild = NULL;  //Sets the leftChild child of the child node to null
-            root->rightChild->rightChild = NULL; //Sets the rightChild child of the child node to null
+            root->right = new Node(word);
         }
     }
     //word is already in the tree so we increment counter
     else  root->count += 1;
 
-
     //find the balance of the tree to know whcih sequence of 
     //rotations to perform
-    int balance = height(root->left) - height(root->right);
-
-    //Now to perform Rotation Operations
-    //CASE 1: LEFT LEFT
-    if(balance > 1 && word < root->left->word) 
-        return rotateRight(root);
-
-
+//    int balance = height(root->left) - height(root->right);
+    if (isBalance(root) == false)
+    {
+        rotationMaker(root, word);
+    }
+    return root;
 }
+
+void AVL::parseFileInsert(string fullPath) {
+    ifstream infile(fullPath); // Open it up!
+    std::string line;
+    char c;
+    string word = "";
+    //int jerry = 0;
+    while (getline(infile, line))
+    {
+        // Iterate through the string one letter at a time.
+        for (int i = 0; i < line.length(); i++) {
+
+            c = line.at(i); // Get a char from string
+            tolower(c);        
+            // if it's NOT within these bounds, then it's not a character
+            if (! ( ( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' ) ) ) {
+
+                //if word is NOT an empty string, insert word into bst
+                if ( word != "" ) {
+                    insert(word);
+                    //jerry += 1;
+                    //cout << jerry << endl;
+                    //reset word string
+                    word = "";
+                }
+            }
+            else {
+                word += string(1, c);
+            }
+         }
+     }
+     
+};
+
+
+struct AVL::Node* AVL::deleteOne(string word) {
+    transform(word.begin(), word.end(), word.begin(), ::tolower);
+    deleteOne(root, word);
+    /*else {
+        cout << "\"" <<  word << "\"" << " does not exist in the tree." << endl;
+    }*/
+};
+
+
+struct AVL::Node* AVL::deleteOne(Node *ptr, string word) {
+    // Find the word 
+    bool found = false;
+    Node* predecessor=NULL; //was NULLptr -DR
+    Node* current=ptr;
+    if(current==NULL) {
+        //do nothing
+        //cout<<"Tree is empty"<<endl;
+        return current; //was empty return -DR
+     }
+    while(current!=NULL)
+    {
+        if(current->word==word)
+        {
+            found = true;
+            break;
+        }
+        else
+        {
+            predecessor = current;
+            if(word > (current->word))
+                current=current->right;
+            else
+                current=current->left;
+        }
+    }
+    if(!found)
+    {
+        //do nothing
+        //cout<<word<<" not in Tree."<<endl;
+        return current; //was empty retur -DR
+    }
+
+    //If the count of the word is greater than 1, we only need to decrement the counter
+    if ( current->count > 1 ) {
+        current->count -= 1;
+    }
+    //if there is only one instance of the word in the tree, we must delete the Node
+    else {
+
+        // CASE 1: Removing a Node with a single child
+        if((current->left==NULL && current->right != NULL) || (current->left != NULL && current->right==NULL))
+        {
+            // RightChild Leaf Present, No LeftChild Leaf
+            if(current->left==NULL && current->right != NULL)
+            {
+                // If predecessor's left tree equals Node ptr
+                if(predecessor->left==current)
+                {
+                    // then predecessor's left tree becomes ptr's right tree
+                    // and delete ptr
+                    predecessor->left=current->right;
+                    delete current;
+                    current=NULL;
+                    //cout<<word<<" has been removed from the Tree."<<endl;
+                }
+                // If predecessor's right tree equals Node ptr
+                else
+                {
+                    // then predecessor's right tree becomes ptr's right tree
+                    // and delete ptr
+                    predecessor->right=current->right;
+                    delete current;
+                    current=NULL;
+                    //cout<<word<<" has been removed from the Tree."<<endl;
+                }
+            }
+            else // LeftChild Leaf Present, No RightChild Leaf Present
+            {
+                if(predecessor->left==current)
+                {
+                    predecessor->left=current->left;
+                    delete current;
+                    current=NULL;
+                    //cout<<word<<" has been removed from the Tree."<<endl;
+                }
+                else
+                {
+                    predecessor->right=current->left;
+                    delete current;
+                    current=NULL;
+                    //cout<<word<<" has been removed from the Tree."<<endl;
+                }
+            }
+            return current; //was empty return -DR
+        }
+        // CASE 2: Removing a Leaf Node
+        if(current->left==NULL && current->right==NULL)
+        {
+            if(predecessor->left==current)
+                predecessor->left=NULL;
+            else
+                predecessor->right=NULL;
+            delete current;
+            //cout<<word<<" has been removed from the Tree."<<endl;
+            return current; //empty return before -DR
+        }
+        // CASE 3: Node has two children
+        // Replace Node with smallest value in right subtree
+        if(current->left != NULL && current->right != NULL)
+        {
+            Node* check=current->right;
+            if((current->left==NULL)&&(current->right==NULL))
+            {
+                current=check;
+                delete check;
+                //current->right==NULL;
+                //cout<<word<<" has been removed from the Tree."<<endl;
+            }
+            else // RightChild child has children
+            {
+                // If the Node's right child has a left child
+                // Move all the way down left to locate smallest element
+                if((current->right)->left!=NULL)
+                {
+                    Node* leftCurrent;
+                    Node* leftCurrentPred;
+                    leftCurrentPred=current->right;
+                    leftCurrent=(current->right)->left;
+                    while(leftCurrent->left != NULL)
+                    {
+                        leftCurrentPred=leftCurrent;
+                        leftCurrent=leftCurrent->left;
+                    }
+                    current->word=leftCurrent->word;
+                    delete leftCurrent;
+                    //leftCurrentPred->left==NULL;
+                    //cout<<word<<" has been removed from the Tree."<<endl;
+                }
+                else
+                {
+                    Node* temp=current->right;
+                    current->word=temp->word;
+                    current->right=temp->right;
+                    delete temp;
+                    //cout<<word<<" has been removed from the Tree."<<endl;
+                }
+            }
+            return current; //Was originally just an empty return -DR
+        }
+    }
+    
+};
