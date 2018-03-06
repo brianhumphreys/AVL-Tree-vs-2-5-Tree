@@ -1,5 +1,5 @@
-#include "BST.h"
-#include "Hash.h"
+#include "AVL.h"
+//#include "Hash.h"
 
 #include <functional>
 #include <dirent.h>
