@@ -47,7 +47,7 @@ int main(){
 	int userInput;
 	bool loop = true;
 
-	string path = "hotels/";
+	string path = "hotels-small/";
 	vector<string> files;
 	recurseDir(avl, path, files, false);
 	
