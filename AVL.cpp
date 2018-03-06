@@ -10,7 +10,6 @@ AVL::AVL(void) {
     root->count = 0;
     root->right = NULL;
     root->left = NULL;
-    root->parent = NULL;
 }
 
 AVL::~AVL()
@@ -88,19 +87,37 @@ struct AVL::Node* AVL::insert(string word) {
 
 struct AVL::Node* AVL::insert(Node* root, string word) {
 
-    //if search returns a node, make newNode equal that value,
-    //if there is no node, initialize one with the word and a count of 0
-    search(word)
-
-    
-    if(newPtr == NULL) {
-         newptr = new Node(word);
+    if(word < root->word)
+    {
+        nodeCount += 1;
+        if(root->leftChild != NULL)
+            insert(word, root->leftChild);
+        else
+        {
+            root->leftChild = new node;
+            root->leftChild->word = word;
+            root->leftChild->count = 1;
+            root->leftChild->leftChild = NULL;    //Sets the leftChild child of the child node to null
+            root->leftChild->rightChild = NULL;   //Sets the rightChild child of the child node to null
+        }  
     }
-    else newPtr->count += 1;
+    else if(word > root->word)
+    {
+        nodeCount += 1;
+        if(root->rightChild != NULL)
+            insert(word, root->rightChild);
+        else
+        {
+            root->rightChild = new node;
+            root->rightChild->word = word;
+            root->rightChild->count = 1;
+            root->rightChild->leftChild = NULL;  //Sets the leftChild child of the child node to null
+            root->rightChild->rightChild = NULL; //Sets the rightChild child of the child node to null
+        }
+    }
+    //word is already in the tree so we increment counter
+    else  root->count += 1;
 
-
-
-    
 
     //find the balance of the tree to know whcih sequence of 
     //rotations to perform

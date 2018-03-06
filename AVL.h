@@ -13,8 +13,14 @@ class AVL {
 
 			std::string word;
 			int count;
-			struct Node* right;
-			struct Node* left;
+			struct Node *right, *left, *parent
+
+            struct Node(std::string word) {
+                word = word;
+                count = 1;
+                right = NULL;
+                left = NULL;
+            }
 
 		};
 		struct Node * root;
