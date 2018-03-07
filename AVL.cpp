@@ -13,15 +13,18 @@ using namespace std;
 
 
 AVL::AVL(void) {
-    root->word = "";
-    root->count = 0;
-    root->right = NULL;
-    root->left = NULL;
+    root = NULL;
+    nodeCount = 0;
 }
 
 AVL::~AVL()
 {
     destroyRecursive(root);
+}
+
+void AVL::printRoot() {
+    cout << "trick" << endl;
+    cout << root;
 }
 
 void AVL::destroyRecursive(Node* Node)
@@ -55,7 +58,7 @@ int AVL::height(Node* root) {
     else return max(height(root->left), height(root->right)) + 1;
 }
 
-struct AVL::Node* AVL::rotateLeft(Node* y) {
+void AVL::rotateLeft(Node* y) {
 
     //label the nodes to be rotated
     Node* x = y->right;
@@ -68,11 +71,11 @@ struct AVL::Node* AVL::rotateLeft(Node* y) {
     //If there was a height variable in the Node then we would 
     //recalculate height here...
 
-    return x;
+    return;
 
 }
 
-struct AVL::Node* AVL::rotateRight(Node* y) {
+void AVL::rotateRight(Node* y) {
     //label the nodes to be rotated
     Node* x = y->left;
     Node* T = x->right;
@@ -84,35 +87,44 @@ struct AVL::Node* AVL::rotateRight(Node* y) {
     //If there was a height variable in the Node then we would 
     //recalculate height here...
 
-    return x;
+    return;
 }
 
-struct AVL::Node* AVL::rotationMaker(Node* x, string word)
+void AVL::rotationMaker(Node* x, string word)
 {
 
     int balance = height(x->left) - height(x->right);
     //Now to perform Rotation Operations
     //CASE 1: LEFT LEFT
     if(balance > 1 && word < x->left->word) 
-        return rotateRight(x);
+    {
+        rotateRight(x);
+        return;
+    }
 
     //CASE 2: LEFT RIGHT
-     if (balance > 1 && word > x->left->word)
+    if (balance > 1 && word > x->left->word)
     {
-        x->left =  rotateLeft(x->left);
-        return rotateRight(x);
+        rotateLeft(x->left);
+        rotateRight(x);
+        return;
     }
 
     //CASE 3: RIGHT LEFT
-     if (balance < -1 && word < x->right->word)
+    if (balance < -1 && word < x->right->word)
     {
-        x->right = rotateRight(x->right);
-        return rotateLeft(x);
+        rotateRight(x->right);
+        rotateLeft(x);
+        return;
     }
 
     //CASE 4: RIGHT RIGHT
-     if (balance < -1 && word > x->right->word)
-        return rotateLeft(x);
+    if (balance < -1 && word > x->right->word)
+    {
+        rotateLeft(x);
+        return;
+    }
+    else return;
 }
 
 bool AVL::isBalance(Node* x)
@@ -124,31 +136,47 @@ bool AVL::isBalance(Node* x)
         return false;
 }
 
-struct AVL::Node* AVL::insert(string word) {
-    return insert(root, word);
+void AVL::insert(string word) {
+    cout << "What up Bitch." << endl;
+    if(this->root != NULL){
+        insert(this->root, word);
+    }
+    else
+    {
+        this->root = new Node(word);
+        nodeCount += 1;
+    }
+
 
 }
 
-struct AVL::Node* AVL::insert(Node* root, string word) {
-
-    if(word < root->word)
+void AVL::insert(Node* root, string word) {
+    
+    if(root == NULL) {
+        root = new Node(word);
+        cout << root << endl;
+        nodeCount += 1;
+    }
+    else if(word < root->word)
     {
-        root->count += 1;
+        
         if(root->left != NULL)
             insert(root->left, word);
         else
         {
             root->left = new Node(word);
+            nodeCount += 1;
         }  
     }
     else if(word > root->word)
     {
-        root->count += 1;
+    
         if(root->right != NULL)
             insert(root->right, word);
         else
         {
             root->right = new Node(word);
+            nodeCount += 1;
         }
     }
     //word is already in the tree so we increment counter
@@ -161,7 +189,6 @@ struct AVL::Node* AVL::insert(Node* root, string word) {
     {
         rotationMaker(root, word);
     }
-    return root;
 }
 
 void AVL::parseFileInsert(string fullPath) {

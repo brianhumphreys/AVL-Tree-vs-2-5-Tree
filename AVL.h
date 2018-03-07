@@ -23,6 +23,8 @@ class AVL {
                 // left = NULL;
         //}
 		};
+
+        int nodeCount;
 		struct Node * root;
     
     public:
@@ -33,24 +35,26 @@ class AVL {
 	    ~AVL();
         void destroyRecursive(Node* node);
 
+        void printRoot();
+
         //search functions
 	    struct Node * search(string word);
         struct Node * searchHelper(struct Node* root, string word);
 
         //utility functions
-        struct Node* rotateLeft(Node* y);
-        struct Node* rotateRight(Node* y);
+        void rotateLeft(Node* y);
+        void rotateRight(Node* y);
         int height(Node* root);
 
         //insert functions
-        struct Node* insert(string word);
-        struct Node* insert(Node* root, string word);
+        void insert(string word);
+        void insert(Node* root, string word);
 
         //Handles directories
         void parseFileInsert(string fullPath);
 
         //inteprets rotations
-        struct Node* rotationMaker(Node* x, string word);
+        void rotationMaker(Node* x, string word);
         bool isBalance(Node* x);
 
         //delete function
