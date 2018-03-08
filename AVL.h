@@ -35,11 +35,12 @@ class AVL {
 	    ~AVL();
         void destroyRecursive(Node* node);
 
-        void printRoot();
+        void printTree();
+        void printTree(Node * root);
 
         //search functions
-	    struct Node * search(string word);
-        struct Node * searchHelper(struct Node* root, string word);
+	    void search(string word);
+        void searchHelper(struct Node* root, string word);
 
         //utility functions
         void rotateLeft(Node* y);
@@ -60,6 +61,14 @@ class AVL {
         //delete function
         struct Node* deleteOne(Node *ptr, string word);
         struct Node* deleteOne(string word);
+
+
+        void lexSort();
+        void lexSort(Node *node, ofstream &outputFile);
+
+
+        vector<string> rangeSearch(string begin, string end);
+        void rangeSearch(Node *node, vector<string>& rangeVector, string low, string high);
 
 };
 

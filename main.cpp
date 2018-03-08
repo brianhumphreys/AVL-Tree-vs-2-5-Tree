@@ -51,7 +51,7 @@ int main(){
 
 	recurseDir(avl, path, files, false);
 
-	avl.printRoot();
+	avl.printTree();
 
 	while (loop)
 	{
@@ -84,14 +84,12 @@ int main(){
 						time_req_AVL = clock();
 
 						time_req_AVL = clock() - time_req_AVL;
-						
+						/*
 						for(int k=0; k<100; k++)
 						{
-							if(avl.search(Input)->word == Input) 
-								cout << "true" << endl;
-							else 
-								cout << "false" << endl; 
-						}
+							avl.search(Input); 
+						}*/
+						avl.search(Input);
 
 						//Hash search function
 						clock_t time_req_Hash;
@@ -121,13 +119,11 @@ int main(){
 						//AVL insert function
 						clock_t time_req_AVL;
 						time_req_AVL = clock();
-
+/*
 						for(int k=0; k<100; k++){
-							if(avl.insert(Input)->count == 1) 
-								cout << "added a new node" << endl;
-							else
-								cout << "added to node count" << endl;
-						}
+							avl.insert(Input);
+						}*/
+						avl.insert(Input);
 						time_req_AVL = clock() - time_req_AVL;
 						
 
@@ -179,10 +175,10 @@ int main(){
 						break;
 					}
 
-			//	case 4 :
-					//{
+				case 4 :
+					{
 						/*cout << "You selected to sort" << endl;*/
-			/*
+			
 						//AVL deleteOne function
 						clock_t time_req_AVL;
 						time_req_AVL = clock();
@@ -208,13 +204,13 @@ int main(){
 
 						break;
 					}
-				*/
-			//	case 5 :
-				//	{
+				
+				case 5 :
+					{
 					
-						/*cout << "You selected to range search" << endl
-							<< "Please type your first word to Range search" << endl;*/
-							/*
+						cout << "You selected to range search" << endl
+							<< "Please type your first word to Range search" << endl;
+						
 						string Input1;
 						cin >> Input1;
 						//cout << "Please type your second word to Range search" << endl;
@@ -242,8 +238,8 @@ int main(){
 						//cout << "Hash: " << (float)time_req_Hash/CLOCKS_PER_SEC << "s" << endl;
 
 						break;
-						*/
-					//}
+						
+					}
 				
 			}
 

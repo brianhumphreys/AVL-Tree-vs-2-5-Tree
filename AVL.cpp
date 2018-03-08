@@ -22,11 +22,6 @@ AVL::~AVL()
     destroyRecursive(root);
 }
 
-void AVL::printRoot() {
-    cout << "trick" << endl;
-    cout << root;
-}
-
 void AVL::destroyRecursive(Node* Node)
 {
     if (Node)
@@ -37,18 +32,31 @@ void AVL::destroyRecursive(Node* Node)
     }
 }
 
-struct AVL::Node* AVL::search(string word) {
-    return searchHelper(root, word);
+void AVL::printTree() {
+    printTree(root);
 }
 
-struct AVL::Node * AVL::searchHelper(struct Node* root, string word) {
+void AVL::printTree(Node * root) {
+    if(root != NULL) {
+        printTree(root->left);
+        cout << root->word << endl;
+        printTree(root->right);
+    }
+}
+
+void AVL::search(string word) {
+    transform(word.begin(), word.end(), word.begin(), ::tolower);
+    searchHelper(root, word);
+}
+
+void AVL::searchHelper(struct Node* root, string word) {
         if(root == NULL) 
-			return root;
+			cout << "false" << endl;
 		else if (word < root->word)
-			return searchHelper(root->left, word);
+			searchHelper(root->left, word);
 		else if (word > root->word)
-			return searchHelper(root->right, word);
-		else return root;
+			searchHelper(root->right, word);
+		else cout << "true" << endl;
 }
 
 
@@ -137,7 +145,8 @@ bool AVL::isBalance(Node* x)
 }
 
 void AVL::insert(string word) {
-    cout << "What up Bitch." << endl;
+    transform(word.begin(), word.end(), word.begin(), ::tolower);
+    cout << nodeCount << endl;
     if(this->root != NULL){
         insert(this->root, word);
     }
@@ -152,12 +161,7 @@ void AVL::insert(string word) {
 
 void AVL::insert(Node* root, string word) {
     
-    if(root == NULL) {
-        root = new Node(word);
-        cout << root << endl;
-        nodeCount += 1;
-    }
-    else if(word < root->word)
+    if(word < root->word)
     {
         
         if(root->left != NULL)
@@ -377,3 +381,69 @@ struct AVL::Node* AVL::deleteOne(Node *ptr, string word) {
     }
     
 };
+
+void AVL::lexSort() {
+    ofstream outputFile;
+    outputFile.open("avlSorted.txt");
+    lexSort(this->root, outputFile);
+    outputFile.close();
+};
+
+void AVL::lexSort(Node *node, ofstream &outputFile) {
+    if (node != nullptr){
+        
+        /* first recur on left child */
+        lexSort(node->left, outputFile);
+        
+        /* then write the data of node to an output file */
+        outputFile << node->word << " ";
+        //cout << node->word << "being written." << endl;
+        /* now recur on right child */
+        lexSort(node->right, outputFile);
+        
+    }
+}
+
+vector<string> AVL::rangeSearch(string begin, string end) {
+    /*bool foundBegin = false;
+    bool foundEnd = false;*/
+    if (begin > end) {
+        string temp = begin;
+        begin = end;
+        end = temp;
+    }
+    vector<string> rangeVector;
+    rangeSearch(root, rangeVector, begin, end);
+    return rangeVector;
+};
+
+// Returns count of nodes in BST in range [low, high]
+void AVL::rangeSearch(Node *node, vector<string>& rangeVector, string low, string high) {
+    // Base case
+    if (node == NULL) return;
+ 
+    // Special Optional case for improving efficiency
+    //if (node->word == high && node->word == low)
+        //cout << "adding to vector." << endl;
+        //rangeVector.push_back(node->word);
+ 
+    // If current node is in range, then include it in count and
+    // recur for left and right children of it
+    if (node->word <= high && node->word >= low){
+        
+        //cout << node->word << endl;
+        //cout << "adding to vector." << endl;
+        rangeSearch(node->left, rangeVector, low, high);
+        rangeVector.push_back(node->word);
+        cout << node->word << endl;
+        rangeSearch(node->right, rangeVector, low, high);
+    }
+    // If current node is smaller than low, then recur for right
+    // child
+    else if (node->word < low) {
+         rangeSearch(node->right, rangeVector, low, high);
+    }
+    // Else recur for left child
+    else rangeSearch(node->left, rangeVector, low, high);
+}
+
