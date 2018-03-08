@@ -123,10 +123,7 @@ int main(){
 						time_req_AVL = clock();
 
 						for(int k=0; k<100; k++){
-							if(avl.insert(Input)->count == 1) 
-								cout << "added a new node" << endl;
-							else
-								cout << "added to node count" << endl;
+							avl.insert(Input);
 						}
 						time_req_AVL = clock() - time_req_AVL;
 						
