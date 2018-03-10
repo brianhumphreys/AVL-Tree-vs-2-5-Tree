@@ -1,4 +1,5 @@
 #include "AVL.h"
+#include "TFT.h"
 
 #include <functional>
 #include <dirent.h>
@@ -42,6 +43,7 @@ int main(){
 	//create a new text file
 	
 	AVL avl;
+	TFT tft;
 	
 	int userInput;
 	bool loop = true;
