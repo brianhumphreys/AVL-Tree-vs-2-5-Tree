@@ -124,8 +124,8 @@ int main(){
 /*
 						for(int k=0; k<100; k++){
 							avl.insert(Input);
-						}*/
-						avl.insert(Input);
+
+
 						time_req_AVL = clock() - time_req_AVL;
 						
 
