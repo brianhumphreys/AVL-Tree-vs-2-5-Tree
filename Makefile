@@ -12,5 +12,11 @@ TFT.o: TFT.cpp
 main.o: main.cpp
 	g++ -c main.cpp
 
+test: test.o
+	g++ test.o -o test
+
+test: tftTest.cpp	
+	g++ -c tftTest.cpp test
+
 clean: 
 	rm -rf *.o main

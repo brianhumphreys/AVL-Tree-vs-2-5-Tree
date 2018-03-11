@@ -97,15 +97,26 @@ void splitChild(string word, Node *node) {
     //new node will hold 
     Node *newNode = new Node();
 
+    
+    //create an index that will transfer words to new node
+    int lengthIndex = node->words.length();
     //copy all but 1 word over to new node
-    for (int i = 0; i < node->words.length() - 1; i++) {
+    for (int i = lengthIndex / 2; i < lengthIndex; i++) {
+        //create string of word to be moved to new sibling node
+        string moveWord = node->words.at(i);
+        //create to subnode
+        SubNode * split = new SubNode(moveWord);
+        //push subnode into word vector of new sibling node
         newNode->words.push(node->words.at(i+1));
+        //remove subnode from old node vector
+        node->words.erase(node->words.begin() + i - 1);
     }
 
     //if node was not a leaf, 
     if (node->isLeaf == false) {
         for (int i = 0; i < node)
     }
+    
 
-    for(int j = )
+    for(int j = 0; j )
 }
