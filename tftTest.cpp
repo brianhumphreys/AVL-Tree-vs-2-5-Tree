@@ -2,6 +2,12 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <functional>
+#include <dirent.h>
+#include <algorithm>
+#include <cstring>
+#include <sstream>
+#include <ctime>
 
 using namespace std;
 
@@ -53,24 +59,24 @@ class AVL {
         void printTree(Node * root) {
             if(root != NULL) {
                 printTree(root->left);
-                cout << root->word << endl;
+                cout << " " << root->word;
                 printTree(root->right);
             }
         }
 
         //search functions
-	    void search(string word) {
+	    bool search(string word) {
             transform(word.begin(), word.end(), word.begin(), ::tolower);
-            searchHelper(root, word);
+            return searchHelper(root, word);
         }
-        void searchHelper(struct Node* root, string word) {
+        bool searchHelper(struct Node* root, string word) {
             if(root == NULL) 
-                cout << "false" << endl;
+                return false;
             else if (word < root->word)
                 searchHelper(root->left, word);
             else if (word > root->word)
                 searchHelper(root->right, word);
-            else cout << "true" << endl;
+            else return true;
         }
 
         //utility functions
@@ -158,7 +164,6 @@ class AVL {
         //insert functions
         void insert(string word) {
             transform(word.begin(), word.end(), word.begin(), ::tolower);
-            cout << nodeCount << endl;
             if(this->root != NULL){
                 insert(this->root, word);
             }
@@ -205,41 +210,6 @@ class AVL {
                 rotationMaker(root, word);
             }
         }
-
-        //Handles directories
-        void parseFileInsert(string fullPath) {
-            ifstream infile;
-            infile.open(fullPath); // Open it up!
-            std::string line;
-            char c;
-            string word = "";
-            //int jerry = 0;
-            while (getline(infile, line))
-            {
-                // Iterate through the string one letter at a time.
-                for (int i = 0; i < line.length(); i++) {
-
-                    c = line.at(i); // Get a char from string
-                    tolower(c);        
-                    // if it's NOT within these bounds, then it's not a character
-                    if (! ( ( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' ) ) ) {
-
-                        //if word is NOT an empty string, insert word into bst
-                        if ( word != "" ) {
-                            insert(word);
-                            //jerry += 1;
-                            //cout << jerry << endl;
-                            //reset word string
-                            word = "";
-                        }
-                    }
-                    else {
-                        word += string(1, c);
-                    }
-                }
-            }
-            
-        };
 
         //delete function
         struct Node* deleteOne(string word) {
@@ -464,10 +434,19 @@ class AVL {
  */
 class TFTNode
 {
-    int *words;  // An array of words
-    int t;      // Minimum degree (defines the range for number of words)
-    TFTNode **C; // An array of child pointers
-    int n;     // Current number of words
+    //struct for each individual node
+    struct Nodelete 
+    {
+        string word;
+        int duplicates;
+
+        Nodelete() : word(""), duplicates(0) {}
+        Nodelete(string word) : word(word), duplicates(1) {}
+    };
+    struct Nodelete *words;  // An array of words
+    int MAXWORDS;      // Minimum degree (defines the range for number of words)
+    TFTNode **children; // An array of child pointers
+    int wordsInNode;     // Current number of words
     bool leaf; // Is true when node is leaf. Otherwise false
  
 public:
@@ -478,127 +457,142 @@ public:
     void traverse();
  
     // A function to search a key in subtree rooted with this node.
-    TFTNode *search(int k);   // returns NULL if k is not present.
+    TFTNode *search(string word);   // returns NULL if word is not present.
  
     // A function that returns the index of the first key that is greater
-    // or equal to k
-    int findKey(int k);
+    // or equal to word
+    int findKey(string word);
  
     // A utility function to insert a new key in the subtree rooted with
     // this node. The assumption is, the node must be non-full when this
     // function is called
-    void insertNonFull(int k);
+    void insertNonFull(string word);
  
     // A utility function to split the child y of this node. i is index
-    // of y in child array C[].  The Child y must be full when this
+    // of y in child array children[].  The Child y must be full when this
     // function is called
     void splitChild(int i, TFTNode *y);
  
-    // A wrapper function to remove the key k in subtree rooted with
+    // A wrapper function to deleteOne the key word in subtree rooted with
     // this node.
-    void remove(int k);
+    void deleteOne(string word);
  
-    // A function to remove the key present in idx-th position in
+    // A function to deleteOne the key present in idx-th position in
     // this node which is a leaf
     void removeFromLeaf(int idx);
  
-    // A function to remove the key present in idx-th position in
+    // A function to deleteOne the key present in idx-th position in
     // this node which is a non-leaf node
     void removeFromNonLeaf(int idx);
  
     // A function to get the predecessor of the key- where the key
     // is present in the idx-th position in the node
-    int getPred(int idx);
+    string getPred(int idx);
  
     // A function to get the successor of the key- where the key
     // is present in the idx-th position in the node
-    int getSucc(int idx);
+    string getSucc(int idx);
  
     // A function to fill up the child node present in the idx-th
-    // position in the C[] array if that child has less than t-1 words
+    // position in the children[] array if that child has less than MAXWORDS-1 words
     void fill(int idx);
  
-    // A function to borrow a key from the C[idx-1]-th node and place
-    // it in C[idx]th node
+    // A function to borrow a key from the children[idx-1]-th node and place
+    // it in children[idx]th node
     void borrowFromPrev(int idx);
  
-    // A function to borrow a key from the C[idx+1]-th node and place it
-    // in C[idx]th node
+    // A function to borrow a key from the children[idx+1]-th node and place it
+    // in children[idx]th node
     void borrowFromNext(int idx);
  
     // A function to merge idx-th child of the node with (idx+1)th child of
     // the node
     void merge(int idx);
+
+    void lexSort(ofstream &outputFile);
  
-    // Make BTree friend of this so that we can access private members of
-    // this class in BTree functions
-    friend class BTree;
+    // Make TFT friend of this so that we can access private members of
+    // this class in TFT functions
+    friend class TFT;
 };
  
-class BTree
+class TFT
 {
     TFTNode *root; // Pointer to root node
-    int t;  // Minimum degree
+    int MAXWORDS;  // Minimum degree
 public:
  
     // Constructor (Initializes tree as empty)
-    BTree(int _t)
+    TFT(int _t)
     {
         root = NULL;
-        t = _t;
+        MAXWORDS = _t;
     }
  
     void traverse()
     {
         if (root != NULL) root->traverse();
     }
+
+    void lexSort() {
+        if (root != NULL) {
+            ofstream outputFile;
+            outputFile.open("tftSorted.txt");
+            root->lexSort(outputFile);
+            outputFile.close();
+        }
+    }
  
     // function to search a key in this tree
-    TFTNode* search(int k)
+    TFTNode* search(string word)
     {
-        return (root == NULL)? NULL : root->search(k);
+        transform(word.begin(), word.end(), word.begin(), ::tolower);
+        return (root == NULL)? NULL : root->search(word);
     }
  
     // The main function that inserts a new key in this B-Tree
-    void insert(int k);
+    void insert(string word);
  
     // The main function that removes a new key in thie B-Tree
-    void remove(int k);
+    void deleteOne(string word);
  
 };
  
-TFTNode::TFTNode(int t1, bool leaf1)
+TFTNode::TFTNode(int t1, bool isLeaf)
 {
     // Copy the given minimum degree and leaf property
-    t = t1;
-    leaf = leaf1;
+    MAXWORDS = t1;
+    leaf = isLeaf;
  
     // Allocate memory for maximum number of possible words
     // and child pointers
-    words = new int[2*t-1];
-    C = new TFTNode *[2*t];
+    words = new Nodelete[2*MAXWORDS-1];
+    children = new TFTNode *[2*MAXWORDS];
  
     // Initialize the number of words as 0
-    n = 0;
+    wordsInNode = 0;
 }
  
 // A utility function that returns the index of the first key that is
-// greater than or equal to k
-int TFTNode::findKey(int k)
+// greater than or equal to word
+int TFTNode::findKey(string word)
 {
+    transform(word.begin(), word.end(), word.begin(), ::tolower);
     int idx=0;
-    while (idx<n && words[idx] < k)
+    while (idx<wordsInNode && words[idx].word < word)
         ++idx;
     return idx;
 }
  
-// A function to remove the key k from the sub-tree rooted with this node
-void TFTNode::remove(int k)
+// A function to deleteOne the key word from the sub-tree rooted with this node
+void TFTNode::deleteOne(string word)
 {
-    int idx = findKey(k);
+    transform(word.begin(), word.end(), word.begin(), ::tolower);
+   
+    int idx = findKey(word);
  
     // The key to be removed is present in this node
-    if (idx < n && words[idx] == k)
+    if (idx < wordsInNode && words[idx].word == word)
     {
  
         // If the node is a leaf node - removeFromLeaf is called
@@ -614,130 +608,130 @@ void TFTNode::remove(int k)
         // If this node is a leaf node, then the key is not present in tree
         if (leaf)
         {
-            cout << "The key "<< k <<" is does not exist in the tree\n";
+            cout << "The key "<< word <<" is does not exist in the tree\n";
             return;
         }
  
         // The key to be removed is present in the sub-tree rooted with this node
         // The flag indicates whether the key is present in the sub-tree rooted
         // with the last child of this node
-        bool flag = ( (idx==n)? true : false );
+        bool flag = ( (idx==wordsInNode)? true : false );
  
-        // If the child where the key is supposed to exist has less that t words,
+        // If the child where the key is supposed to exist has less that MAXWORDS words,
         // we fill that child
-        if (C[idx]->n < t)
+        if (children[idx]->wordsInNode < MAXWORDS)
             fill(idx);
  
         // If the last child has been merged, it must have merged with the previous
         // child and so we recurse on the (idx-1)th child. Else, we recurse on the
-        // (idx)th child which now has atleast t words
-        if (flag && idx > n)
-            C[idx-1]->remove(k);
+        // (idx)th child which now has atleast MAXWORDS words
+        if (flag && idx > wordsInNode)
+            children[idx-1]->deleteOne(word);
         else
-            C[idx]->remove(k);
+            children[idx]->deleteOne(word);
     }
     return;
 }
  
-// A function to remove the idx-th key from this node - which is a leaf node
+// A function to deleteOne the idx-th key from this node - which is a leaf node
 void TFTNode::removeFromLeaf (int idx)
 {
  
     // Move all the words after the idx-th pos one place backward
-    for (int i=idx+1; i<n; ++i)
-        words[i-1] = words[i];
+    for (int i=idx+1; i<wordsInNode; ++i)
+        words[i-1].word = words[i].word;
  
     // Reduce the count of words
-    n--;
+    wordsInNode--;
  
     return;
 }
  
-// A function to remove the idx-th key from this node - which is a non-leaf node
+// A function to deleteOne the idx-th key from this node - which is a non-leaf node
 void TFTNode::removeFromNonLeaf(int idx)
 {
  
-    int k = words[idx];
+    string word = words[idx].word;
  
-    // If the child that precedes k (C[idx]) has atleast t words,
-    // find the predecessor 'pred' of k in the subtree rooted at
-    // C[idx]. Replace k by pred. Recursively delete pred
-    // in C[idx]
-    if (C[idx]->n >= t)
+    // If the child that precedes word (children[idx]) has atleast MAXWORDS words,
+    // find the predecessor 'pred' of word in the subtree rooted at
+    // children[idx]. Replace word by pred. Recursively delete pred
+    // in children[idx]
+    if (children[idx]->wordsInNode >= MAXWORDS)
     {
-        int pred = getPred(idx);
-        words[idx] = pred;
-        C[idx]->remove(pred);
+        string pred = getPred(idx);
+        words[idx].word = pred;
+        children[idx]->deleteOne(pred);
     }
  
-    // If the child C[idx] has less that t words, examine C[idx+1].
-    // If C[idx+1] has atleast t words, find the successor 'succ' of k in
-    // the subtree rooted at C[idx+1]
-    // Replace k by succ
-    // Recursively delete succ in C[idx+1]
-    else if  (C[idx+1]->n >= t)
+    // If the child children[idx] has less that MAXWORDS words, examine children[idx+1].
+    // If children[idx+1] has atleast MAXWORDS words, find the successor 'succ' of word in
+    // the subtree rooted at children[idx+1]
+    // Replace word by succ
+    // Recursively delete succ in children[idx+1]
+    else if  (children[idx+1]->wordsInNode >= MAXWORDS)
     {
-        int succ = getSucc(idx);
-        words[idx] = succ;
-        C[idx+1]->remove(succ);
+        string succ = getSucc(idx);
+        words[idx].word = succ;
+        children[idx+1]->deleteOne(succ);
     }
  
-    // If both C[idx] and C[idx+1] has less that t words,merge k and all of C[idx+1]
-    // into C[idx]
-    // Now C[idx] contains 2t-1 words
-    // Free C[idx+1] and recursively delete k from C[idx]
+    // If both children[idx] and children[idx+1] has less that MAXWORDS words,merge word and all of children[idx+1]
+    // into children[idx]
+    // Now children[idx] contains 2t-1 words
+    // Free children[idx+1] and recursively delete word from children[idx]
     else
     {
         merge(idx);
-        C[idx]->remove(k);
+        children[idx]->deleteOne(word);
     }
     return;
 }
  
-// A function to get predecessor of words[idx]
-int TFTNode::getPred(int idx)
+// A function to get predecessor of words[idx]->word
+string TFTNode::getPred(int idx)
 {
     // Keep moving to the right most node until we reach a leaf
-    TFTNode *cur=C[idx];
+    TFTNode *cur=children[idx];
     while (!cur->leaf)
-        cur = cur->C[cur->n];
+        cur = cur->children[cur->wordsInNode];
  
     // Return the last key of the leaf
-    return cur->words[cur->n-1];
+    return cur->words[cur->wordsInNode-1].word;
 }
  
-int TFTNode::getSucc(int idx)
+string TFTNode::getSucc(int idx)
 {
  
-    // Keep moving the left most node starting from C[idx+1] until we reach a leaf
-    TFTNode *cur = C[idx+1];
+    // Keep moving the left most node starting from children[idx+1] until we reach a leaf
+    TFTNode *cur = children[idx+1];
     while (!cur->leaf)
-        cur = cur->C[0];
+        cur = cur->children[0];
  
     // Return the first key of the leaf
-    return cur->words[0];
+    return cur->words[0].word;
 }
  
-// A function to fill child C[idx] which has less than t-1 words
+// A function to fill child children[idx] which has less than MAXWORDS-1 words
 void TFTNode::fill(int idx)
 {
  
-    // If the previous child(C[idx-1]) has more than t-1 words, borrow a key
+    // If the previous child(children[idx-1]) has more than MAXWORDS-1 words, borrow a key
     // from that child
-    if (idx!=0 && C[idx-1]->n>=t)
+    if (idx!=0 && children[idx-1]->wordsInNode>=MAXWORDS)
         borrowFromPrev(idx);
  
-    // If the next child(C[idx+1]) has more than t-1 words, borrow a key
+    // If the next child(children[idx+1]) has more than MAXWORDS-1 words, borrow a key
     // from that child
-    else if (idx!=n && C[idx+1]->n>=t)
+    else if (idx!=wordsInNode && children[idx+1]->wordsInNode>=MAXWORDS)
         borrowFromNext(idx);
  
-    // Merge C[idx] with its sibling
-    // If C[idx] is the last child, merge it with with its previous sibling
+    // Merge children[idx] with its sibling
+    // If children[idx] is the last child, merge it with with its previous sibling
     // Otherwise merge it with its next sibling
     else
     {
-        if (idx != n)
+        if (idx != wordsInNode)
             merge(idx);
         else
             merge(idx-1);
@@ -745,119 +739,119 @@ void TFTNode::fill(int idx)
     return;
 }
  
-// A function to borrow a key from C[idx-1] and insert it
-// into C[idx]
+// A function to borrow a key from children[idx-1] and insert it
+// into children[idx]
 void TFTNode::borrowFromPrev(int idx)
 {
  
-    TFTNode *child=C[idx];
-    TFTNode *sibling=C[idx-1];
+    TFTNode *child=children[idx];
+    TFTNode *sibling=children[idx-1];
  
-    // The last key from C[idx-1] goes up to the parent and key[idx-1]
-    // from parent is inserted as the first key in C[idx]. Thus, the  loses
+    // The last key from children[idx-1] goes up to the parent and key[idx-1]
+    // from parent is inserted as the first key in children[idx]. Thus, the  loses
     // sibling one key and child gains one key
  
-    // Moving all key in C[idx] one step ahead
-    for (int i=child->n-1; i>=0; --i)
-        child->words[i+1] = child->words[i];
+    // Moving all key in children[idx] one step ahead
+    for (int i=child->wordsInNode-1; i>=0; --i)
+        child->words[i+1].word = child->words[i].word;
  
-    // If C[idx] is not a leaf, move all its child pointers one step ahead
+    // If children[idx] is not a leaf, move all its child pointers one step ahead
     if (!child->leaf)
     {
-        for(int i=child->n; i>=0; --i)
-            child->C[i+1] = child->C[i];
+        for(int i=child->wordsInNode; i>=0; --i)
+            child->children[i+1] = child->children[i];
     }
  
     // Setting child's first key equal to words[idx-1] from the current node
-    child->words[0] = words[idx-1];
+    child->words[0].word = words[idx-1].word;
  
-    // Moving sibling's last child as C[idx]'s first child
+    // Moving sibling's last child as children[idx]'s first child
     if (!leaf)
-        child->C[0] = sibling->C[sibling->n];
+        child->children[0] = sibling->children[sibling->wordsInNode];
  
     // Moving the key from the sibling to the parent
     // This reduces the number of words in the sibling
-    words[idx-1] = sibling->words[sibling->n-1];
+    words[idx-1].word = sibling->words[sibling->wordsInNode-1].word;
  
-    child->n += 1;
-    sibling->n -= 1;
+    child->wordsInNode += 1;
+    sibling->wordsInNode -= 1;
  
     return;
 }
  
-// A function to borrow a key from the C[idx+1] and place
-// it in C[idx]
+// A function to borrow a key from the children[idx+1] and place
+// it in children[idx]
 void TFTNode::borrowFromNext(int idx)
 {
  
-    TFTNode *child=C[idx];
-    TFTNode *sibling=C[idx+1];
+    TFTNode *child=children[idx];
+    TFTNode *sibling=children[idx+1];
  
-    // words[idx] is inserted as the last key in C[idx]
-    child->words[(child->n)] = words[idx];
+    // words[idx] is inserted as the last key in children[idx]
+    child->words[(child->wordsInNode)].word = words[idx].word;
  
     // Sibling's first child is inserted as the last child
-    // into C[idx]
+    // into children[idx]
     if (!(child->leaf))
-        child->C[(child->n)+1] = sibling->C[0];
+        child->children[(child->wordsInNode)+1] = sibling->children[0];
  
-    //The first key from sibling is inserted into words[idx]
-    words[idx] = sibling->words[0];
+    //The first key from sibling is inserted into words[idx].word
+    words[idx].word = sibling->words[0].word;
  
     // Moving all words in sibling one step behind
-    for (int i=1; i<sibling->n; ++i)
-        sibling->words[i-1] = sibling->words[i];
+    for (int i=1; i<sibling->wordsInNode; ++i)
+        sibling->words[i-1].word = sibling->words[i].word;
  
     // Moving the child pointers one step behind
     if (!sibling->leaf)
     {
-        for(int i=1; i<=sibling->n; ++i)
-            sibling->C[i-1] = sibling->C[i];
+        for(int i=1; i<=sibling->wordsInNode; ++i)
+            sibling->children[i-1] = sibling->children[i];
     }
  
-    // Increasing and decreasing the key count of C[idx] and C[idx+1]
+    // Increasing and decreasing the key count of children[idx] and children[idx+1]
     // respectively
-    child->n += 1;
-    sibling->n -= 1;
+    child->wordsInNode += 1;
+    sibling->wordsInNode -= 1;
  
     return;
 }
  
-// A function to merge C[idx] with C[idx+1]
-// C[idx+1] is freed after merging
+// A function to merge children[idx] with children[idx+1]
+// children[idx+1] is freed after merging
 void TFTNode::merge(int idx)
 {
-    TFTNode *child = C[idx];
-    TFTNode *sibling = C[idx+1];
+    TFTNode *child = children[idx];
+    TFTNode *sibling = children[idx+1];
  
-    // Pulling a key from the current node and inserting it into (t-1)th
-    // position of C[idx]
-    child->words[t-1] = words[idx];
+    // Pulling a key from the current node and inserting it into (MAXWORDS-1)th
+    // position of children[idx]
+    child->words[MAXWORDS-1].word = words[idx].word;
  
-    // Copying the words from C[idx+1] to C[idx] at the end
-    for (int i=0; i<sibling->n; ++i)
-        child->words[i+t] = sibling->words[i];
+    // Copying the words from children[idx+1] to children[idx] at the end
+    for (int i=0; i<sibling->wordsInNode; ++i)
+        child->words[i+MAXWORDS].word = sibling->words[i].word;
  
-    // Copying the child pointers from C[idx+1] to C[idx]
+    // Copying the child pointers from children[idx+1] to children[idx]
     if (!child->leaf)
     {
-        for(int i=0; i<=sibling->n; ++i)
-            child->C[i+t] = sibling->C[i];
+        for(int i=0; i<=sibling->wordsInNode; ++i)
+            child->children[i+MAXWORDS] = sibling->children[i];
     }
  
     // Moving all words after idx in the current node one step before -
-    // to fill the gap created by moving words[idx] to C[idx]
-    for (int i=idx+1; i<n; ++i)
-        words[i-1] = words[i];
+    // to fill the gap created by moving words[idx].word to children[idx]
+    for (int i=idx+1; i<wordsInNode; ++i)
+        words[i-1].word = words[i].word;
  
     // Moving the child pointers after (idx+1) in the current node one
     // step before
-    for (int i=idx+2; i<=n; ++i)
-        C[i-1] = C[i];
+    for (int i=idx+2; i<=wordsInNode; ++i)
+        children[i-1] = children[i];
  
     // Updating the key count of child and the current node
-    child->n += sibling->n+1;
-    n--;
+    child->wordsInNode += sibling->wordsInNode+1;
+    wordsInNode--;
  
     // Freeing the memory occupied by sibling
     delete(sibling);
@@ -865,26 +859,37 @@ void TFTNode::merge(int idx)
 }
  
 // The main function that inserts a new key in this B-Tree
-void BTree::insert(int k)
+void TFT::insert(string word)
 {
+    transform(word.begin(), word.end(), word.begin(), ::tolower);
+
+
     // If tree is empty
     if (root == NULL)
     {
         // Allocate memory for root
-        root = new TFTNode(t, true);
-        root->words[0] = k;  // Insert key
-        root->n = 1;  // Update number of words in root
+        root = new TFTNode(MAXWORDS, true);
+        //initialize nodelete with a word and set it equal to the root's
+        //first nodelete
+        root->words[0].word = word;  // Insert key
+        root->words[0].duplicates = 1;
+
+        root->wordsInNode = 1;  // Update number of words in root
     }
-    else // If tree is not empty
+
+    //search if the word exists in the tree
+    //If it does, just add to the duplicate value of that Nodelete
+    TFTNode *ptr = root->search(word);
+    if(!ptr) // If tree is not empty
     {
         // If root is full, then tree grows in height
-        if (root->n == 2*t-1)
+        if (root->wordsInNode == 2*MAXWORDS-1)
         {
             // Allocate memory for new root
-            TFTNode *s = new TFTNode(t, false);
+            TFTNode *s = new TFTNode(MAXWORDS, false);
  
             // Make old root as child of new root
-            s->C[0] = root;
+            s->children[0] = root;
  
             // Split the old root and move 1 key to the new root
             s->splitChild(0, root);
@@ -892,25 +897,34 @@ void BTree::insert(int k)
             // New root has two children now.  Decide which of the
             // two children is going to have new key
             int i = 0;
-            if (s->words[0] < k)
+            if (s->words[0].word < word)
                 i++;
-            s->C[i]->insertNonFull(k);
+            s->children[i]->insertNonFull(word);
+
  
             // Change root
             root = s;
         }
         else  // If root is not full, call insertNonFull for root
-            root->insertNonFull(k);
+            root->insertNonFull(word);
+    }
+    else {
+        for(int i = 0; i < ptr->wordsInNode; i++) {
+            if(ptr->words[i].word == word) 
+                ptr->words[i].duplicates += 1;
+        }
+        
     }
 }
  
 // A utility function to insert a new key in this node
 // The assumption is, the node must be non-full when this
 // function is called
-void TFTNode::insertNonFull(int k)
+void TFTNode::insertNonFull(string word)
 {
+    transform(word.begin(), word.end(), word.begin(), ::tolower);
     // Initialize index as index of rightmost element
-    int i = n-1;
+    int i = wordsInNode-1;
  
     // If this is a leaf node
     if (leaf == true)
@@ -918,35 +932,35 @@ void TFTNode::insertNonFull(int k)
         // The following loop does two things
         // a) Finds the location of new key to be inserted
         // b) Moves all greater words to one place ahead
-        while (i >= 0 && words[i] > k)
+        while (i >= 0 && words[i].word > word)
         {
-            words[i+1] = words[i];
+            words[i+1].word = words[i].word;
             i--;
         }
  
         // Insert the new key at found location
-        words[i+1] = k;
-        n = n+1;
+        words[i+1].word = word;
+        wordsInNode = wordsInNode+1;
     }
     else // If this node is not leaf
     {
         // Find the child which is going to have the new key
-        while (i >= 0 && words[i] > k)
+        while (i >= 0 && words[i].word > word)
             i--;
  
         // See if the found child is full
-        if (C[i+1]->n == 2*t-1)
+        if (children[i+1]->wordsInNode == 2*MAXWORDS-1)
         {
             // If the child is full, then split it
-            splitChild(i+1, C[i+1]);
+            splitChild(i+1, children[i+1]);
  
-            // After split, the middle key of C[i] goes up and
-            // C[i] is splitted into two.  See which of the two
+            // After split, the middle key of children[i] goes up and
+            // children[i] is splitted into two.  See which of the two
             // is going to have the new key
-            if (words[i+1] < k)
+            if (words[i+1].word < word)
                 i++;
         }
-        C[i+1]->insertNonFull(k);
+        children[i+1]->insertNonFull(word);
     }
 }
  
@@ -954,75 +968,76 @@ void TFTNode::insertNonFull(int k)
 // Note that y must be full when this function is called
 void TFTNode::splitChild(int i, TFTNode *y)
 {
-    // Create a new node which is going to store (t-1) words
+    // Create a new node which is going to store (MAXWORDS-1) words
     // of y
-    TFTNode *z = new TFTNode(y->t, y->leaf);
-    z->n = t - 1;
+    TFTNode *z = new TFTNode(y->MAXWORDS, y->leaf);
+    z->wordsInNode = MAXWORDS - 1;
  
-    // Copy the last (t-1) words of y to z
-    for (int j = 0; j < t-1; j++)
-        z->words[j] = y->words[j+t];
+    // Copy the last (MAXWORDS-1) words of y to z
+    for (int j = 0; j < MAXWORDS-1; j++)
+        z->words[j].word = y->words[j+MAXWORDS].word;
  
-    // Copy the last t children of y to z
+    // Copy the last MAXWORDS children of y to z
     if (y->leaf == false)
     {
-        for (int j = 0; j < t; j++)
-            z->C[j] = y->C[j+t];
+        for (int j = 0; j < MAXWORDS; j++)
+            z->children[j] = y->children[j+MAXWORDS];
     }
  
     // Reduce the number of words in y
-    y->n = t - 1;
+    y->wordsInNode = MAXWORDS - 1;
  
     // Since this node is going to have a new child,
     // create space of new child
-    for (int j = n; j >= i+1; j--)
-        C[j+1] = C[j];
+    for (int j = wordsInNode; j >= i+1; j--)
+        children[j+1] = children[j];
  
     // Link the new child to this node
-    C[i+1] = z;
+    children[i+1] = z;
  
     // A key of y will move to this node. Find location of
     // new key and move all greater words one space ahead
-    for (int j = n-1; j >= i; j--)
-        words[j+1] = words[j];
+    for (int j = wordsInNode-1; j >= i; j--)
+        words[j+1].word = words[j].word;
  
     // Copy the middle key of y to this node
-    words[i] = y->words[t-1];
+    words[i].word = y->words[MAXWORDS-1].word;
  
     // Increment count of words in this node
-    n = n + 1;
+    wordsInNode = wordsInNode + 1;
 }
  
 // Function to traverse all nodes in a subtree rooted with this node
 void TFTNode::traverse()
 {
-    // There are n words and n+1 children, travers through n words
-    // and first n children
+    // There are wordsInNode words and wordsInNode+1 children, travers through wordsInNode words
+    // and first wordsInNode children
     int i;
-    for (i = 0; i < n; i++)
+    for (i = 0; i < wordsInNode; i++)
     {
         // If this is not leaf, then before printing key[i],
-        // traverse the subtree rooted with child C[i].
+        // traverse the subtree rooted with child children[i].
         if (leaf == false)
-            C[i]->traverse();
-        cout << " " << words[i];
+            children[i]->traverse();
+        cout << " " << words[i].word;
     }
  
     // Print the subtree rooted with last child
     if (leaf == false)
-        C[i]->traverse();
+        children[i]->traverse();
 }
  
-// Function to search key k in subtree rooted with this node
-TFTNode *TFTNode::search(int k)
+// Function to search key word in subtree rooted with this node
+TFTNode *TFTNode::search(string word)
 {
-    // Find the first key greater than or equal to k
+    transform(word.begin(), word.end(), word.begin(), ::tolower);
+    // Find the first key greater than or equal to word
     int i = 0;
-    while (i < n && k > words[i])
+    while (i < wordsInNode && word > words[i].word)
         i++;
  
-    // If the found key is equal to k, return this node
-    if (words[i] == k)
+    // If the found key is equal to word, return this node
+    if (words[i].word == word)
         return this;
  
     // If key is not found here and this is a leaf node
@@ -1030,98 +1045,306 @@ TFTNode *TFTNode::search(int k)
         return NULL;
  
     // Go to the appropriate child
-    return C[i]->search(k);
+    return children[i]->search(word);
 }
  
-void BTree::remove(int k)
+void TFT::deleteOne(string word)
 {
+    transform(word.begin(), word.end(), word.begin(), ::tolower);
     if (!root)
     {
         cout << "The tree is empty\n";
         return;
     }
  
-    // Call the remove function for root
-    root->remove(k);
- 
-    // If the root node has 0 words, make its first child as the new root
-    //  if it has a child, otherwise set root as NULL
-    if (root->n==0)
-    {
-        TFTNode *tmp = root;
-        if (root->leaf)
-            root = NULL;
-        else
-            root = root->C[0];
- 
-        // Free the old root
-        delete tmp;
+     
+    //find if the word exists in the tree.
+    //If it does, take one away from the duplicate
+    //If duplicate reaches 0, delete the Nodelete from the tree
+    TFTNode* ptr = root->search(word);
+    int idx;
+    for(int i = 0; i < ptr->wordsInNode; i++) {
+        if(ptr->words[i].word == word)
+            idx = i;
+    }
+    //if there is only one instance of the word, delete Nodelete
+    if(idx == 1) {
+
+        // Call the deleteOne function for root
+        root->deleteOne(word);
+    
+        // If the root node has 0 words, make its first child as the new root
+        //  if it has a child, otherwise set root as NULL
+        if (root->wordsInNode==0)
+        {
+            TFTNode *tmp = root;
+            if (root->leaf)
+                root = NULL;
+            else
+                root = root->children[0];
+    
+            // Free the old root
+            delete tmp;
+        }
+    }
+    else {
+        ptr->words[idx].duplicates -= 1;
     }
     return;
 }
+
+//A function to traverse throughout the tree and write every word in the
+//tree to an output file lexocographically!!!
+void TFTNode::lexSort(ofstream &outputFile)
+{
+    // There are wordsInNode words and wordsInNode+1 children, travers through wordsInNode words
+    // and first wordsInNode children
+    int i;
+    for (i = 0; i < wordsInNode; i++)
+    {
+        // If this is not leaf, then before printing key[i],
+        // lexSort the subtree rooted with child children[i].
+        if (leaf == false)
+            children[i]->lexSort(outputFile);
+        outputFile << words[i].word << " ";
+    }
+
+    // Print the subtree rooted with last child
+    if (leaf == false)
+        children[i]->lexSort(outputFile);
+}
+
+//Handles directories
+void parseFileInsert(AVL& avl, TFT& tft, string fullPath) {
+    ifstream infile;
+    infile.open(fullPath); // Open it up!
+    std::string line;
+    char c;
+    string word = "";
+    //int jerry = 0;
+    while (getline(infile, line))
+    {
+        // Iterate through the string one letter at a time.
+        for (int i = 0; i < line.length(); i++) {
+
+            c = line.at(i); // Get a char from string
+            tolower(c);        
+            // if it's NOT within these bounds, then it's not a character
+            if (! ( ( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' ) ) ) {
+
+                //if word is NOT an empty string, insert word into bst
+                if ( word != "" ) {
+                    avl.insert(word);
+                    tft.insert(word);
+                    //jerry += 1;
+                    //cout << jerry << endl;
+                    //reset word string
+                    word = "";
+                }
+            }
+            else {
+                word += string(1, c);
+            }
+        }
+    }
+    
+};
  
+//This is a function used in main to traverse the directories and feed
+//path names into parseFileInsert for words to be inserted into data structures
+void recurseDir(AVL& avl,TFT& tft, const string path, vector<string> files,const bool showHiddenDirs = false){
+    DIR *dpdf;
+    struct dirent *epdf;
+    dpdf = opendir(path.c_str());
+    int count = 0;
+    if (dpdf != NULL){
+        while ((epdf = readdir(dpdf)) != NULL){
+            if(showHiddenDirs ? (epdf->d_type==DT_DIR && string(epdf->d_name) != ".." && string(epdf->d_name) != "." ) : (epdf->d_type==DT_DIR && strstr(epdf->d_name,"..") == NULL && strstr(epdf->d_name,".") == NULL ) ){
+                recurseDir(avl, tft, path+epdf->d_name+"/",files, showHiddenDirs);
+            }
+            if(epdf->d_type==DT_REG){
+                
+                parseFileInsert(avl, tft, path+epdf->d_name);
+            }
+        }
+    }
+    closedir(dpdf);
+}
+
 // Driver program to test above functions
 int main()
 {
-    BTree t(3); // A B-Tree with minium degree 3
- 
-    t.insert(1);
-    t.insert(3);
-    t.insert(7);
-    t.insert(10);
-    t.insert(11);
-    t.insert(13);
-    t.insert(14);
-    t.insert(15);
-    t.insert(18);
-    t.insert(16);
-    t.insert(19);
-    t.insert(24);
-    t.insert(25);
-    t.insert(26);
-    t.insert(21);
-    t.insert(4);
-    t.insert(5);
-    t.insert(20);
-    t.insert(22);
-    t.insert(2);
-    t.insert(17);
-    t.insert(12);
-    t.insert(6);
- 
-    cout << "Traversal of tree constructed is\n";
-    t.traverse();
-    cout << endl;
- 
-    t.remove(6);
-    cout << "Traversal of tree after removing 6\n";
-    t.traverse();
-    cout << endl;
- 
-    t.remove(13);
-    cout << "Traversal of tree after removing 13\n";
-    t.traverse();
-    cout << endl;
- 
-    t.remove(7);
-    cout << "Traversal of tree after removing 7\n";
-    t.traverse();
-    cout << endl;
- 
-    t.remove(4);
-    cout << "Traversal of tree after removing 4\n";
-    t.traverse();
-    cout << endl;
- 
-    t.remove(2);
-    cout << "Traversal of tree after removing 2\n";
-    t.traverse();
-    cout << endl;
- 
-    t.remove(16);
-    cout << "Traversal of tree after removing 16\n";
-    t.traverse();
-    cout << endl;
+    //Start of Project
+	//create a new text file
+	
+    //create an AVL tree
+	AVL avl;
+    //create a 2-5 Tree that holds a max of 4 words in each node
+	TFT tft(4);
+
+    //build the data structures from the data base given
+    string path = "test/";
+	vector<string> files;
+	recurseDir(avl, tft, path, files, false);
+
+    char input = 0;
+	while (input != 'q')
+	{
+		cout << "Enter a number to preform functionality" << endl;
+		cout << "1 = search" << endl
+			<< "2 = insert" << endl
+			<< "3 = delete" << endl
+			<< "4 = sort"   << endl
+			<< "5 = range search" << endl
+			<< "q = quit program" << endl; 
+		cin >> input;
+		
+	
+        switch(input)
+        {
+            case '1' :
+                {
+                    cout << "You selected to search" << endl
+                        << "Please type a word to search" << endl;
+                    string Input;
+                    cin >> Input;
+
+                    //AVL search function
+                    //timing fucntions to clock speed of functions
+                    clock_t time_req_AVL;
+                    time_req_AVL = clock();
+                    bool isInAVL = avl.search(Input);
+                    time_req_AVL = clock() - time_req_AVL;
+
+                    //TFT search function
+                    clock_t time_req_TFT;
+                    time_req_TFT = clock();
+                    tft.search(Input);
+                    time_req_TFT = clock() - time_req_TFT;
+
+                    //print timing values of functions
+                    cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
+                    cout << "TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
+                    break;
+                }
+
+            case '2' :
+                {
+                    cout << "You selected to insert" << endl
+                        << "Please type a word to insert" << endl;
+                    string Input;
+                    cin >> Input;
+
+                    //AVL insert function
+                    clock_t time_req_AVL;
+                    time_req_AVL = clock();
+                    avl.insert(Input);
+                    time_req_AVL = clock() - time_req_AVL;
+
+                    //TFT insert function
+                    clock_t time_req_TFT;
+                    time_req_TFT = clock();
+                    tft.insert(Input);
+                    time_req_TFT = clock() - time_req_TFT;
+
+                    //print timing values of functions
+                    cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
+                    cout << "TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
+                    break;
+                }
+
+            case '3' :
+                {
+                    cout << "You selected to delete" << endl
+                        << "Please type a word to delete" << endl;
+                    string Input;
+                    cin >> Input;
+
+                    //AVL deleteOne function
+                    clock_t time_req_AVL;
+                    time_req_AVL = clock();
+                    avl.deleteOne(Input);
+                    time_req_AVL = clock() - time_req_AVL;
+
+                    //TFT deleteOne function
+                    clock_t time_req_TFT;
+                    time_req_TFT = clock();
+                    tft.deleteOne(Input);
+                    time_req_TFT = clock() - time_req_TFT;
+
+                    //print timing values of functions
+                    cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
+                    cout << "TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
+                    break;
+                }
+
+            case '4' :
+                {
+                    
+                    cout << "You selected to sort" << endl;
+        
+                    //AVL deleteOne function
+                    clock_t time_req_AVL;
+                    time_req_AVL = clock();
+                    avl.lexSort();
+                    time_req_AVL = clock() - time_req_AVL;
+
+
+                    //TFT deleteOne function
+                    clock_t time_req_TFT;
+                    time_req_TFT = clock();
+                    tft.lexSort();
+                    time_req_TFT = clock() - time_req_TFT;
+
+                    //print values of timing functions
+                    cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
+                    cout << "TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
+                    break;
+                    
+                }
+            
+            case '5' :
+                {
+                    /*
+                    cout << "You selected to range search" << endl
+                        << "Please type your first word to Range search" << dl;
+                    
+                    string Input1;
+                    cin >> Input1;
+                    cout << "Please type your second word to Range search" << endl;
+                    string Input2;
+                    cin >> Input2;
+                    
+                    //AVL rangeSearch function
+                    clock_t time_req_AVL;
+                    time_req_AVL = clock();
+                    avl.rangeSearch(Input1, Input2);
+                    time_req_AVL = clock() - time_req_AVL;
+
+                    //TFT rangeSearch function
+                    clock_t time_req_TFT;
+                    time_req_TFT = clock();
+                    tft.rangeSearch(Input1, Input2);
+                    time_req_TFT = clock() - time_req_TFT;
+
+                    //print values of timing functions
+                    cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
+                    cout << "TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
+                    break;
+                    */
+                }
+            case 'q' : {
+                cout << "Program has finished." << endl;
+                break;}
+            default: {
+                cout << "not a valid input.\n\n";
+                break;
+            }
+        }
+
+    
+	}
+
  
     return 0;
 }
