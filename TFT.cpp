@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 
 #include "TFT.h"
 
@@ -57,6 +58,7 @@ void TFT::search(string word, Node *root) {
         cout << "False" << endl;
 }
 
+<<<<<<< HEAD
 struct TFT::Node* TFT::deleteOne(string word) {
     transform(word.begin(), word.end(), word.begin(), ::tolower);
     deleteOne(root, word);
@@ -176,3 +178,56 @@ struct TFT::Node* TFT::deleteOne(Node *ptr, string word)
         {
 
         }
+=======
+
+bool TFT::hasMaxChildren() {
+
+    bool isMax;
+    if(children.size() < MAXCHILDREN)
+        isMax = true;
+    else 
+        isMax = false;
+
+    return isMax;
+}
+
+void insert(string word);
+{
+    //if tree is empty
+    if(root == NULL) {
+        root = new Node(word);
+    }
+    //if tree is not empty
+    else {
+        //if root is full
+        if (root->words.size() == MAXVALUES) {
+            //create a new node
+            Node * newRoot = new Node();
+
+            //make old root the new root
+            newRoot->children[0] = root;
+
+            //split old root and make children of new root
+            
+        }
+    }
+}
+void insertNonFull(string word);
+void splitChild(string word, Node *node) {
+
+    //new node will hold 
+    Node *newNode = new Node();
+
+    //copy all but 1 word over to new node
+    for (int i = 0; i < node->words.length() - 1; i++) {
+        newNode->words.push(node->words.at(i+1));
+    }
+
+    //if node was not a leaf, 
+    if (node->isLeaf == false) {
+        for (int i = 0; i < node)
+    }
+
+    for(int j = )
+}
+>>>>>>> 5c60db2648113eb3b9c869ad8d5118e135540079
