@@ -1,6 +1,7 @@
 #ifndef __TFT_H_INCLUDED__
 #define __TFT_H_INCLUDED__
 
+#include <vector>
 #include <string>
 
 using namespace std;
@@ -19,8 +20,8 @@ class TFT {
 
         struct Node {
             //use vectors instead
-            vector<struct SubNode> *words;
-            vector<struct Node> *children;
+            std::vector<struct SubNode> *words;
+            std::vector<struct Node> *children;
 
         };
 
@@ -42,6 +43,9 @@ class TFT {
 
         //function the returns truth statement if node has max children or not
         bool hasMaxChildren();
+
+        struct Node* deleteOne(string word);
+        struct Node* deleteOne(Node *ptr, string word);
 };
 
 #endif

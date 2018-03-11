@@ -196,7 +196,7 @@ void AVL::insert(Node* root, string word) {
 }
 
 void AVL::parseFileInsert(string fullPath) {
-    ifstream infile(fullPath); // Open it up!
+    ifstream infile(fullPath.c_str()); // Open it up!
     std::string line;
     char c;
     string word = "";
