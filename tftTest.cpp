@@ -73,9 +73,9 @@ class AVL {
             if(root == NULL) 
                 return false;
             else if (word < root->word)
-                searchHelper(root->left, word);
+                return searchHelper(root->left, word);
             else if (word > root->word)
-                searchHelper(root->right, word);
+                return searchHelper(root->right, word);
             else return true;
         }
 
@@ -387,8 +387,9 @@ class AVL {
 
 
         std::vector<string> rangeSearch(string begin, string end) {
-            /*bool foundBegin = false;
-            bool foundEnd = false;*/
+            transform(begin.begin(), begin.end(), begin.begin(), ::tolower);
+            transform(end.begin(), end.end(), end.begin(), ::tolower);
+            //switch begin and end if end comes before begin in alphabet
             if (begin > end) {
                 string temp = begin;
                 begin = end;
@@ -409,13 +410,14 @@ class AVL {
         
             // If current node is in range, then include it in count and
             // recur for left and right children of it
+
             if (node->word <= high && node->word >= low){
                 
                 //cout << node->word << endl;
                 //cout << "adding to vector." << endl;
                 rangeSearch(node->left, rangeVector, low, high);
                 rangeVector.push_back(node->word);
-                cout << node->word << endl;
+                //cout << node->word << endl;
                 rangeSearch(node->right, rangeVector, low, high);
             }
             // If current node is smaller than low, then recur for right
@@ -441,7 +443,7 @@ class TFTNode
         int duplicates;
 
         Nodelete() : word(""), duplicates(0) {}
-        Nodelete(string word) : word(word), duplicates(1) {}
+        Nodelete(string word) : word(word), duplicates(0) {}
     };
     struct Nodelete *words;  // An array of words
     int MAXWORDS;      // Minimum degree (defines the range for number of words)
@@ -510,6 +512,8 @@ public:
     void merge(int idx);
 
     void lexSort(ofstream &outputFile);
+
+    void rangeSearch(vector<string>& rangeVector, string low, string high);
  
     // Make TFT friend of this so that we can access private members of
     // this class in TFT functions
@@ -549,6 +553,9 @@ public:
         transform(word.begin(), word.end(), word.begin(), ::tolower);
         return (root == NULL)? NULL : root->search(word);
     }
+
+    //range search function
+    std::vector<string> rangeSearch(string begin, string end);
  
     // The main function that inserts a new key in this B-Tree
     void insert(string word);
@@ -876,44 +883,46 @@ void TFT::insert(string word)
 
         root->wordsInNode = 1;  // Update number of words in root
     }
-
-    //search if the word exists in the tree
-    //If it does, just add to the duplicate value of that Nodelete
-    TFTNode *ptr = root->search(word);
-    if(!ptr) // If tree is not empty
-    {
-        // If root is full, then tree grows in height
-        if (root->wordsInNode == 2*MAXWORDS-1)
-        {
-            // Allocate memory for new root
-            TFTNode *s = new TFTNode(MAXWORDS, false);
- 
-            // Make old root as child of new root
-            s->children[0] = root;
- 
-            // Split the old root and move 1 key to the new root
-            s->splitChild(0, root);
- 
-            // New root has two children now.  Decide which of the
-            // two children is going to have new key
-            int i = 0;
-            if (s->words[0].word < word)
-                i++;
-            s->children[i]->insertNonFull(word);
-
- 
-            // Change root
-            root = s;
-        }
-        else  // If root is not full, call insertNonFull for root
-            root->insertNonFull(word);
-    }
     else {
-        for(int i = 0; i < ptr->wordsInNode; i++) {
-            if(ptr->words[i].word == word) 
-                ptr->words[i].duplicates += 1;
+        //search if the word exists in the tree
+        //If it does, just add to the duplicate value of that Nodelete
+        TFTNode *ptr = root->search(word);
+        if(!ptr) // If tree is not empty
+        {
+            // If root is full, then tree grows in height
+            if (root->wordsInNode == 2*MAXWORDS-1)
+            {
+                // Allocate memory for new root
+                TFTNode *s = new TFTNode(MAXWORDS, false);
+    
+                // Make old root as child of new root
+                s->children[0] = root;
+    
+                // Split the old root and move 1 key to the new root
+                s->splitChild(0, root);
+    
+                // New root has two children now.  Decide which of the
+                // two children is going to have new key
+                int i = 0;
+                if (s->words[0].word < word)
+                    i++;
+                s->children[i]->insertNonFull(word);
+
+    
+                // Change root
+                root = s;
+            }
+            else  // If root is not full, call insertNonFull for root
+                root->insertNonFull(word);
         }
-        
+        else {
+
+            for(int i = 0; i < ptr->wordsInNode; i++) {
+                if(ptr->words[i].word == word) 
+                    ptr->words[i].duplicates += 1;
+            }
+            
+        }
     }
 }
  
@@ -1068,7 +1077,8 @@ void TFT::deleteOne(string word)
             idx = i;
     }
     //if there is only one instance of the word, delete Nodelete
-    if(idx == 1) {
+    cout << "number : " << ptr->words[idx].duplicates << endl;
+    if(ptr->words[idx].duplicates == 1) {
 
         // Call the deleteOne function for root
         root->deleteOne(word);
@@ -1113,6 +1123,43 @@ void TFTNode::lexSort(ofstream &outputFile)
     if (leaf == false)
         children[i]->lexSort(outputFile);
 }
+
+std::vector<string> TFT::rangeSearch(string begin, string end) {
+    transform(begin.begin(), begin.end(), begin.begin(), ::tolower);
+    transform(end.begin(), end.end(), end.begin(), ::tolower);
+    //switch begin and end if end comes before begin in alphabet
+    if (begin > end) {
+        string temp = begin;
+        begin = end;
+        end = temp;
+    }
+    vector<string> rangeVector;
+    root->rangeSearch(rangeVector, begin, end);
+    return rangeVector;
+}
+
+void TFTNode::rangeSearch(vector<string>& rangeVector, string low, string high) {
+
+    // There are wordsInNode words and wordsInNode+1 children, travers through wordsInNode words
+    // and first wordsInNode children
+    int i;
+    for (i = 0; i < wordsInNode; i++)
+    {
+        // If this is not leaf, then before printing key[i],
+        // traverse the subtree rooted with child children[i].
+        if (leaf == false)
+            children[i]->rangeSearch(rangeVector, low, high);
+
+        // If current node is in range, then include it in count and
+        // recur for left and right children of it
+        if (words[i].word <= high && words[i].word >= low)
+            rangeVector.push_back(words[i].word);
+    }
+ 
+    // Print the subtree rooted with last child
+    if(leaf == false)
+        children[i]->rangeSearch(rangeVector, low, high);
+};
 
 //Handles directories
 void parseFileInsert(AVL& avl, TFT& tft, string fullPath) {
@@ -1219,12 +1266,16 @@ int main()
                     //TFT search function
                     clock_t time_req_TFT;
                     time_req_TFT = clock();
-                    tft.search(Input);
+                    bool isInTFT = tft.search(Input);
                     time_req_TFT = clock() - time_req_TFT;
+
+                    //print truth value of word's existence based on searches of both data bases
+                    if(isInAVL && isInTFT) cout << "true" << endl;
+                    else cout << "false" << endl;
 
                     //print timing values of functions
                     cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
-                    cout << "TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
+                    cout << "2-5: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
                     break;
                 }
 
@@ -1249,7 +1300,7 @@ int main()
 
                     //print timing values of functions
                     cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
-                    cout << "TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
+                    cout << "2-5: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
                     break;
                 }
 
@@ -1272,9 +1323,11 @@ int main()
                     tft.deleteOne(Input);
                     time_req_TFT = clock() - time_req_TFT;
 
+                    
+
                     //print timing values of functions
                     cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
-                    cout << "TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
+                    cout << "2-5: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
                     break;
                 }
 
@@ -1298,16 +1351,16 @@ int main()
 
                     //print values of timing functions
                     cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
-                    cout << "TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
+                    cout << "2-5: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
                     break;
                     
                 }
             
             case '5' :
                 {
-                    /*
+                    
                     cout << "You selected to range search" << endl
-                        << "Please type your first word to Range search" << dl;
+                        << "Please type your first word to Range search" << endl;
                     
                     string Input1;
                     cin >> Input1;
@@ -1318,20 +1371,28 @@ int main()
                     //AVL rangeSearch function
                     clock_t time_req_AVL;
                     time_req_AVL = clock();
-                    avl.rangeSearch(Input1, Input2);
+                    vector<string> avlvec = avl.rangeSearch(Input1, Input2);
                     time_req_AVL = clock() - time_req_AVL;
+                    //print out AVL contents
+                    for (std::vector<string>::const_iterator i = avlvec.begin(); i != avlvec.end(); ++i)
+                        std::cout << *i << ' ';
+                    cout << endl;
 
                     //TFT rangeSearch function
                     clock_t time_req_TFT;
                     time_req_TFT = clock();
-                    tft.rangeSearch(Input1, Input2);
+                    vector<string> tftvec = tft.rangeSearch(Input1, Input2);
                     time_req_TFT = clock() - time_req_TFT;
+                    //print out TFT contents
+                    for (std::vector<string>::const_iterator i = tftvec.begin(); i != tftvec.end(); ++i)
+                        std::cout << *i << ' ';
+                    cout << endl;
 
                     //print values of timing functions
                     cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
-                    cout << "TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
+                    cout << "2-5: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
                     break;
-                    */
+                    
                 }
             case 'q' : {
                 cout << "Program has finished." << endl;
