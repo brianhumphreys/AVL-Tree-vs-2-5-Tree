@@ -1,13 +1,10 @@
 #I am a makefile
 
-main:  AVL.o TFT.o main.o
-	g++ AVL.o TFT.o main.o -o main
+main:  AVL.o  main.o
+	g++ -std=c++11 AVL.o main.o -o main
 
 AVL.o: AVL.cpp
-	g++ -c AVL.cpp
-
-TFT.o: TFT.cpp	
-	g++ -c TFT.cpp
+	g++ -std=c++11 -c AVL.cpp
 
 main.o: main.cpp
 	g++ -c main.cpp

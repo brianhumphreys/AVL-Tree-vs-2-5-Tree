@@ -2,6 +2,7 @@
 #define __AVL_H_INCLUDED__
 
 #include <string>
+#include <vector>
 using namespace std;
 
 class AVL {
@@ -67,7 +68,7 @@ class AVL {
         void lexSort(Node *node, ofstream &outputFile);
 
 
-        vector<string> rangeSearch(string begin, string end);
+        std::vector<string> rangeSearch(string begin, string end);
         void rangeSearch(Node *node, vector<string>& rangeVector, string low, string high);
 
 };

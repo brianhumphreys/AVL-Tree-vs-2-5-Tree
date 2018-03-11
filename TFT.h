@@ -1,6 +1,7 @@
 #ifndef __TFT_H_INCLUDED__
 #define __TFT_H_INCLUDED__
 
+#include <vector>
 #include <string>
 #include <vector>
 
@@ -52,6 +53,8 @@ class TFT {
         //function the returns truth statement if node has max children or not
         bool hasMaxChildren();
 
+        struct Node* deleteOne(string word);
+        struct Node* deleteOne(Node *ptr, string word);
         void insert(string word);
         void insertNonFull(string word);
         void splitChild(string word, Node *node);

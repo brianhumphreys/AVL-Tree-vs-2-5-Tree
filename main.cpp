@@ -14,7 +14,6 @@
 
 using namespace std;
 
-
 void recurseDir(AVL& avl, const string path, vector<string> files,const bool showHiddenDirs = false){
     DIR *dpdf;
     struct dirent *epdf;
@@ -35,8 +34,6 @@ void recurseDir(AVL& avl, const string path, vector<string> files,const bool sho
     }
     closedir(dpdf);
 }
-
-
 
 int main(){
 	//Start of Project
@@ -65,8 +62,6 @@ int main(){
 			<< "5 = range search" << endl
 			<< "6 = quit program" << endl; 
 		cin >> userInput;
-
-		
 		
 		if(userInput == 1 || 2 || 3 || 4 || 5 )
 		{
@@ -74,177 +69,132 @@ int main(){
 			{
 				case 1 :
 					{
-						/*cout << "You selected to search" << endl
-							<< "PLease type a word to search" << endl;*/
+						cout << "You selected to search" << endl
+							<< "PLease type a word to search" << endl;
 						string Input;
 						cin >> Input;
-						avl.search(Input);
 
 						//AVL search function
 						//timing fucntions to clock speed of functions
 						clock_t time_req_AVL;
 						time_req_AVL = clock();
-
-						time_req_AVL = clock() - time_req_AVL;
-						/*
-						for(int k=0; k<100; k++)
-						{
-							avl.search(Input); 
-						}*/
 						avl.search(Input);
+						time_req_AVL = clock() - time_req_AVL;
 
-						//Hash search function
-						clock_t time_req_Hash;
-						time_req_Hash = clock();
-
-						/*
-						for(int k=0; k<100; k++)
-						{
-							myHash.search(Input);
-						}*/
-
-						time_req_Hash = clock() - time_req_Hash;
+						//TFT search function
+						clock_t time_req_TFT;
+						time_req_TFT = clock();
+						tft.search(Input);
+						time_req_TFT = clock() - time_req_TFT;
 
 						//print timing values of functions
 						cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
-						//cout << "Hash: " << (float)time_req_Hash/CLOCKS_PER_SEC << "s" << endl;*/
+						cout << "TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
 						break;
 					}
 
 				case 2 :
 					{
-						/*cout << "You selected to insert" << endl
-							<< "Please type a word to insert" << endl;*/
+						cout << "You selected to insert" << endl
+							<< "Please type a word to insert" << endl;
 						string Input;
 						cin >> Input;
 
 						//AVL insert function
 						clock_t time_req_AVL;
 						time_req_AVL = clock();
-/*
-						for(int k=0; k<100; k++){
-							avl.insert(Input);
-
-
+						avl.insert(Input);
 						time_req_AVL = clock() - time_req_AVL;
-						
 
-						//Hash insert function
-						clock_t time_req_Hash;
-						time_req_Hash = clock();
-
-						/*
-						for(int k=0; k<100; k++){
-							myHash.insert(Input);
-						}*/
-						time_req_Hash = clock() - time_req_Hash;
+						//TFT insert function
+						clock_t time_req_TFT;
+						time_req_TFT = clock();
+						tft.insert(Input);
+						time_req_TFT = clock() - time_req_TFT;
 
 						//print timing values of functions
 						cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
-						//cout << "Hash: " << (float)time_req_Hash/CLOCKS_PER_SEC << "s" << endl;
-
+						cout << "TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
 						break;
 					}
 
 				case 3 :
 					{
-						/*cout << "You selected to delete" << endl
-							<< "Please type a word to delete" << endl;*/
+						cout << "You selected to delete" << endl
+							<< "Please type a word to delete" << endl;
 						string Input;
 						cin >> Input;
 
 						//AVL deleteOne function
 						clock_t time_req_AVL;
 						time_req_AVL = clock();
-						for(int k=0; k<100; k++){
-							avl.deleteOne(Input);
-						}
+						avl.deleteOne(Input);
 						time_req_AVL = clock() - time_req_AVL;
 
-						//Hash deleteOne function
-						clock_t time_req_Hash;
-						time_req_Hash = clock();
-						/*
-						for(int k=0; k<100; k++){
-							myHash.deleteOne(Input);
-						}*/
-						time_req_Hash = clock() - time_req_Hash;
+						//TFT deleteOne function
+						clock_t time_req_TFT;
+						time_req_TFT = clock();
+						tft.deleteOne(Input);
+						time_req_TFT = clock() - time_req_TFT;
 
 						//print timing values of functions
 						cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
-						//cout << "Hash: " << (float)time_req_Hash/CLOCKS_PER_SEC << "s" << endl;
-
+						cout <"TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
 						break;
 					}
 
 				case 4 :
 					{
-						/*cout << "You selected to sort" << endl;*/
+						cout << "You selected to sort" << endl;
 			
 						//AVL deleteOne function
 						clock_t time_req_AVL;
 						time_req_AVL = clock();
-
-						
 						avl.lexSort();
-					
 						time_req_AVL = clock() - time_req_AVL;
 
 
-						//Hash deleteOne function
-						clock_t time_req_Hash;
-						time_req_Hash = clock();
-
-						
-						//myHash.lexSort();
-					
-						time_req_Hash = clock() - time_req_Hash;
+						//TFT deleteOne function
+						clock_t time_req_TFT;
+						time_req_TFT = clock();
+						tft.lexSort();
+						time_req_TFT = clock() - time_req_TFT;
 
 						//print values of timing functions
 						cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
-						//cout << "Hash: " << (float)time_req_Hash/CLOCKS_PER_SEC << "s" << endl;
-
+						cout <"TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
 						break;
 					}
 				
 				case 5 :
 					{
-					
 						cout << "You selected to range search" << endl
-							<< "Please type your first word to Range search" << endl;
+							<< "Please type your first word to Range search" << dl;
 						
 						string Input1;
 						cin >> Input1;
-						//cout << "Please type your second word to Range search" << endl;
+						cout << "Please type your second word to Range search" << endl;
 						string Input2;
 						cin >> Input2;
 						
 						//AVL rangeSearch function
 						clock_t time_req_AVL;
 						time_req_AVL = clock();
-
 						avl.rangeSearch(Input1, Input2);
 						time_req_AVL = clock() - time_req_AVL;
 
-						//Hash rangeSearch function
-						clock_t time_req_Hash;
-						time_req_Hash = clock();
-
-						
-						//myHash.rangeSearch(Input1, Input2);
-
-						time_req_Hash = clock() - time_req_Hash;
+						//TFT rangeSearch function
+						clock_t time_req_TFT;
+						time_req_TFT = clock();
+						tft.rangeSearch(Input1, Input2);
+						time_req_TFT = clock() - time_req_TFT;
 
 						//print values of timing functions
 						cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;
-						//cout << "Hash: " << (float)time_req_Hash/CLOCKS_PER_SEC << "s" << endl;
-
+						cout <"TFT: " << (float)time_req_TFT/CLOCKS_PER_SEC << "s" << endl;
 						break;
-						
 					}
-				
 			}
-
 		}
 		else
 		{
@@ -253,11 +203,5 @@ int main(){
 		}
     
 	}
-	/*Instructions:
-	 * Parse a file and remove unwanted characters
-	 * 	Ignore all stopwords and non alphabetical texts
-	 * 	Words should not be case sensative
-	 * Insert Each word using the insert function for AVL AND HT
-	 */
 return 0;
 }
