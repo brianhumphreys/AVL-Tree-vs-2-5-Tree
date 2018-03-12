@@ -1,3 +1,6 @@
+#ifndef __TFTNODE_H_INCLUDED__
+#define __TFTNODE_H_INCLUDED__
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -94,3 +97,5 @@ class TFTNode
         // this class in TFT functions
         friend class TFT;
 };
+
+#endif

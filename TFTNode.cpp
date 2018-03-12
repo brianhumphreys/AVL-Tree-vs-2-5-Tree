@@ -15,6 +15,53 @@ TFTNode::TFTNode(int t1, bool isLeaf)
     // Initialize the number of words as 0
     wordsInNode = 0;
 }
+
+// A utility function to insert a new key in this node
+// The assumption is, the node must be non-full when this
+// function is called
+void TFTNode::insertNonFull(string word)
+{
+    transform(word.begin(), word.end(), word.begin(), ::tolower);
+    // Initialize index as index of rightmost element
+    int i = wordsInNode-1;
+ 
+    // If this is a leaf node
+    if (leaf == true)
+    {
+        // The following loop does two things
+        // a) Finds the location of new key to be inserted
+        // b) Moves all greater words to one place ahead
+        while (i >= 0 && words[i].word > word)
+        {
+            words[i+1].word = words[i].word;
+            i--;
+        }
+ 
+        // Insert the new key at found location
+        words[i+1].word = word;
+        wordsInNode = wordsInNode+1;
+    }
+    else // If this node is not leaf
+    {
+        // Find the child which is going to have the new key
+        while (i >= 0 && words[i].word > word)
+            i--;
+ 
+        // See if the found child is full
+        if (children[i+1]->wordsInNode == 2*MAXWORDS-1)
+        {
+            // If the child is full, then split it
+            splitChild(i+1, children[i+1]);
+ 
+            // After split, the middle key of children[i] goes up and
+            // children[i] is splitted into two.  See which of the two
+            // is going to have the new key
+            if (words[i+1].word < word)
+                i++;
+        }
+        children[i+1]->insertNonFull(word);
+    }
+}
  
 // A utility function that returns the index of the first key that is
 // greater than or equal to word
@@ -301,5 +348,135 @@ void TFTNode::merge(int idx)
     delete(sibling);
     return;
 }
+
+// A utility function to split the child y of this node
+// Note that y must be full when this function is called
+void TFTNode::splitChild(int i, TFTNode *y)
+{
+    // Create a new node which is going to store (MAXWORDS-1) words
+    // of y
+    TFTNode *z = new TFTNode(y->MAXWORDS, y->leaf);
+    z->wordsInNode = MAXWORDS - 1;
+ 
+    // Copy the last (MAXWORDS-1) words of y to z
+    for (int j = 0; j < MAXWORDS-1; j++)
+        z->words[j].word = y->words[j+MAXWORDS].word;
+ 
+    // Copy the last MAXWORDS children of y to z
+    if (y->leaf == false)
+    {
+        for (int j = 0; j < MAXWORDS; j++)
+            z->children[j] = y->children[j+MAXWORDS];
+    }
+ 
+    // Reduce the number of words in y
+    y->wordsInNode = MAXWORDS - 1;
+ 
+    // Since this node is going to have a new child,
+    // create space of new child
+    for (int j = wordsInNode; j >= i+1; j--)
+        children[j+1] = children[j];
+ 
+    // Link the new child to this node
+    children[i+1] = z;
+ 
+    // A key of y will move to this node. Find location of
+    // new key and move all greater words one space ahead
+    for (int j = wordsInNode-1; j >= i; j--)
+        words[j+1].word = words[j].word;
+ 
+    // Copy the middle key of y to this node
+    words[i].word = y->words[MAXWORDS-1].word;
+ 
+    // Increment count of words in this node
+    wordsInNode = wordsInNode + 1;
+}
+
+void TFTNode::rangeSearch(vector<string>& rangeVector, string low, string high) {
+
+    // There are wordsInNode words and wordsInNode+1 children, travers through wordsInNode words
+    // and first wordsInNode children
+    int i;
+    for (i = 0; i < wordsInNode; i++)
+    {
+        // If this is not leaf, then before printing key[i],
+        // traverse the subtree rooted with child children[i].
+        if (leaf == false)
+            children[i]->rangeSearch(rangeVector, low, high);
+
+        // If current node is in range, then include it in count and
+        // recur for left and right children of it
+        if (words[i].word <= high && words[i].word >= low)
+            rangeVector.push_back(words[i].word);
+    }
+ 
+    // Print the subtree rooted with last child
+    if(leaf == false)
+        children[i]->rangeSearch(rangeVector, low, high);
+};
+
+// Function to search key word in subtree rooted with this node
+TFTNode *TFTNode::search(string word)
+{
+    transform(word.begin(), word.end(), word.begin(), ::tolower);
+    // Find the first key greater than or equal to word
+    int i = 0;
+    while (i < wordsInNode && word > words[i].word)
+        i++;
+ 
+    // If the found key is equal to word, return this node
+    if (words[i].word == word)
+        return this;
+ 
+    // If key is not found here and this is a leaf node
+    if (leaf == true)
+        return NULL;
+ 
+    // Go to the appropriate child
+    return children[i]->search(word);
+}
+
+//A function to traverse throughout the tree and write every word in the
+//tree to an output file lexocographically!!!
+void TFTNode::lexSort(ofstream &outputFile)
+{
+    // There are wordsInNode words and wordsInNode+1 children, travers through wordsInNode words
+    // and first wordsInNode children
+    int i;
+    for (i = 0; i < wordsInNode; i++)
+    {
+        // If this is not leaf, then before printing key[i],
+        // lexSort the subtree rooted with child children[i].
+        if (leaf == false)
+            children[i]->lexSort(outputFile);
+        outputFile << words[i].word << " ";
+    }
+
+    // Print the subtree rooted with last child
+    if (leaf == false)
+        children[i]->lexSort(outputFile);
+}
+
+// Function to traverse all nodes in a subtree rooted with this node
+void TFTNode::traverse()
+{
+    // There are wordsInNode words and wordsInNode+1 children, travers through wordsInNode words
+    // and first wordsInNode children
+    int i;
+    for (i = 0; i < wordsInNode; i++)
+    {
+        // If this is not leaf, then before printing key[i],
+        // traverse the subtree rooted with child children[i].
+        if (leaf == false)
+            children[i]->traverse();
+        cout << " " << words[i].word;
+    }
+ 
+    // Print the subtree rooted with last child
+    if (leaf == false)
+        children[i]->traverse();
+}
+
+
 
 

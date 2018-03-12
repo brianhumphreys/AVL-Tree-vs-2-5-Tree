@@ -1,3 +1,6 @@
+#ifndef __AVL_H_INCLUDED__
+#define __AVL_H_INCLUDED__
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -65,6 +68,8 @@ class AVL {
         std::vector<string> rangeSearch(string begin, string end);
         void rangeSearch(Node *node, vector<string>& rangeVector, string low, string high);
 };
+
+#endif
 
 
 

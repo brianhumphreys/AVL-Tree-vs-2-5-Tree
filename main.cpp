@@ -1,5 +1,6 @@
 #include "AVL.h"
 #include "TFT.h"
+#include "TFTNode.h"
 
 #include <iostream>
 #include <fstream>

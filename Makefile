@@ -4,16 +4,16 @@ main:  AVL.o TFT.o main.o TFTNode.o
 	g++ AVL.o TFT.o main.o TFTNode.o -o main
 
 AVL.o: AVL.cpp
-	g++ -std=c++11 -c AVL.cpp
+	g++ -c AVL.cpp
 
 TFT.o: TFT.cpp	
-	g++ -std=c++11 -c TFT.cpp
+	g++ -c TFT.cpp
 
 TFTNode.o: TFTNode.cpp	
-	g++ -std=c++11 -c TFTNode.cpp
+	g++ -c TFTNode.cpp
 
 main.o: main.cpp
-	g++ -std=c++11 -c main.cpp 
+	g++ -c main.cpp 
 
 clean: 
 	rm -rf *.o main
