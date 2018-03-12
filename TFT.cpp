@@ -131,42 +131,6 @@ else {
     return;
 }
 
-//Handles directories
-void TFT::parseFileInsert(AVL& avl, TFT& tft, string fullPath) {
-    ifstream infile;
-    infile.open(fullPath); // Open it up!
-    std::string line;
-    char c;
-    string word = "";
-    //int jerry = 0;
-    while (getline(infile, line))
-    {
-        // Iterate through the string one letter at a time.
-        for (int i = 0; i < line.length(); i++) {
-
-            c = line.at(i); // Get a char from string
-            tolower(c);        
-            // if it's NOT within these bounds, then it's not a character
-            if (! ( ( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' ) ) ) {
-
-                //if word is NOT an empty string, insert word into bst
-                if ( word != "" ) {
-                    avl.insert(word);
-                    tft.insert(word);
-                    //jerry += 1;
-                    //cout << jerry << endl;
-                    //reset word string
-                    word = "";
-                }
-            }
-            else {
-                word += string(1, c);
-            }
-        }
-    }
-    
-};
-
 std::vector<string> TFT::rangeSearch(string begin, string end) {
     transform(begin.begin(), begin.end(), begin.begin(), ::tolower);
     transform(end.begin(), end.end(), end.begin(), ::tolower);

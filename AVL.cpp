@@ -367,7 +367,6 @@ void AVL::lexSort(Node *node, ofstream &outputFile)
         /* first recur on left child */
         lexSort(node->left, outputFile);
 
-        /* then write the data of node to an output file */
         outputFile << node->word << " ";
         //cout << node->word << "being written." << endl;
         /* now recur on right child */

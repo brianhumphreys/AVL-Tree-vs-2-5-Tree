@@ -29,9 +29,7 @@ public:
 
     void deleteOne(std::string word);
 
-    void parseFileInsert(AVL& avl, TFT& tft, string fullPath);
-
-    std::vector<string> rangeSearch(std::string begin, string end);
+    std::vector<std::string> rangeSearch(std::string begin, std::string end);
 
     TFTNode* search(std::string word)
     {
