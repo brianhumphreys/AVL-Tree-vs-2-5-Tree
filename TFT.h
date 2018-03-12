@@ -25,15 +25,15 @@ public:
 
     void lexSort();
 
-    void insert(string word);
+    void insert(std::string word);
 
-    void deleteOne(string word);
+    void deleteOne(std::string word);
 
     void parseFileInsert(AVL& avl, TFT& tft, string fullPath);
 
-    std::vector<string> rangeSearch(string begin, string end);
+    std::vector<string> rangeSearch(std::string begin, string end);
 
-    TFTNode* search(string word)
+    TFTNode* search(std::string word)
     {
         transform(word.begin(), word.end(), word.begin(), ::tolower);
         return (root == NULL)? NULL : root->search(word);

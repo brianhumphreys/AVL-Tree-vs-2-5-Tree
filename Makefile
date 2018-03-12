@@ -1,19 +1,19 @@
 #I am a makefile
 
-main:  AVL.o  main.o
-	g++ -std=c++11 AVL.o main.o -o main
+main:  AVL.o TFT.o main.o TFTNode.o
+	g++ AVL.o TFT.o main.o TFTNode.o -o main
 
 AVL.o: AVL.cpp
 	g++ -std=c++11 -c AVL.cpp
 
+TFT.o: TFT.cpp	
+	g++ -std=c++11 -c TFT.cpp
+
+TFTNode.o: TFTNode.cpp	
+	g++ -std=c++11 -c TFTNode.cpp
+
 main.o: main.cpp
-	g++ -c main.cpp
-
-test: test.o
-	g++ test.o -o test
-
-test: tftTest.cpp	
-	g++ -c tftTest.cpp test
+	g++ -std=c++11 -c main.cpp 
 
 clean: 
 	rm -rf *.o main
