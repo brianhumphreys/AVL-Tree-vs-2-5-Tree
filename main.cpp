@@ -1,6 +1,5 @@
 #include "AVL.h"
 #include "TFT.h"
-#include "TFTNode.h"
 
 #include <iostream>
 #include <fstream>
@@ -14,7 +13,7 @@
 #include <ctime>
  
 //Handles directories
-void TFT::parseFileInsert(AVL& avl, TFT& tft, string fullPath) {
+void parseFileInsert(AVL& avl, TFT& tft, string fullPath) {
     ifstream infile;
     infile.open(fullPath); // Open it up!
     std::string line;
@@ -52,7 +51,7 @@ void TFT::parseFileInsert(AVL& avl, TFT& tft, string fullPath) {
 
 //This is a function used in main to traverse the directories and feed
 //path names into parseFileInsert for words to be inserted into data structures
-void recurseDir(AVL&searchsearch avl,TFT& tft, const string path, vector<string> files,const bool showHiddenDirs = false){
+void recurseDir(AVL& avl,TFT& tft, const string path, vector<string> files,const bool showHiddenDirs = false){
     DIR *dpdf;
     struct dirent *epdf;
     dpdf = opendir(path.c_str());
