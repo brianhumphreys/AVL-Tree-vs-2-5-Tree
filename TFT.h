@@ -14,6 +14,8 @@
 #include <sstream>
 #include <ctime>
 
+using namespace std;
+
 class TFT
 {
     TFTNode *root; // Pointer to root node
@@ -26,7 +28,7 @@ class TFT
     
         void traverse();
 
-        void lexSort();
+        void lexSort(ofstream &outputFile);
 
         void insert(std::string word);
 

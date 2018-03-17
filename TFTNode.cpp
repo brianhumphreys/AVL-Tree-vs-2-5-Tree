@@ -449,7 +449,7 @@ void TFTNode::lexSort(ofstream &outputFile)
         // lexSort the subtree rooted with child children[i].
         if (leaf == false)
             children[i]->lexSort(outputFile);
-        outputFile << words[i].word << " ";
+        outputFile << words[i].word << endl;
     }
 
     // Print the subtree rooted with last child

@@ -13,14 +13,11 @@ TFT::TFT(int _t)
     if (root != NULL) root->traverse();
 }
 
-void TFT::lexSort() 
+void TFT::lexSort(std::ofstream &outputFile) 
 {
     if (root != NULL) 
     {
-        ofstream outputFile;
-        outputFile.open("tftSorted.txt");
         root->lexSort(outputFile);
-        outputFile.close();
     }
 }
 

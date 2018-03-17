@@ -12,6 +12,7 @@
 #include <cstring>
 #include <sstream>
 #include <ctime>
+#include <boost>
  
 //Handles directories
 void parseFileInsert(AVL& avl, TFT& tft, string fullPath) {
@@ -63,7 +64,7 @@ void recurseDir(AVL& avl,TFT& tft, const string path, vector<string> files,const
                 recurseDir(avl, tft, path+epdf->d_name+"/",files, showHiddenDirs);
             }
             if(epdf->d_type==DT_REG){
-                
+                cout << path+epdf->d_name << endl;
                 parseFileInsert(avl, tft, path+epdf->d_name);
             }
         }
@@ -81,6 +82,12 @@ int main()
 	AVL avl;
     //create a 2-5 Tree that holds a max of 4 words in each node
 	TFT tft(4);
+
+    boost::filesystem::path p("C:\\folder\\foo.txt");
+    boost::filesystem::path dir = p.parent_path();
+
+    cout << dir<< endl << endl;
+
 
     //build the data structures from the data base given
     string path = "test/";
@@ -187,19 +194,27 @@ int main()
                 {
                     
                     cout << "You selected to sort" << endl;
-        
+
+                    //create an output file to store sorted words
+                    ofstream outputFile;
+                    outputFile.open("output.txt");
+
                     //AVL deleteOne function
                     clock_t time_req_AVL;
                     time_req_AVL = clock();
-                    avl.lexSort();
+                    avl.lexSort(outputFile);
                     time_req_AVL = clock() - time_req_AVL;
 
+                    outputFile << endl;
 
                     //TFT deleteOne function
                     clock_t time_req_TFT;
                     time_req_TFT = clock();
-                    tft.lexSort();
+                    tft.lexSort(outputFile);
                     time_req_TFT = clock() - time_req_TFT;
+
+                    //close output file out show file path
+                    outputFile.close();
 
                     //print values of timing functions
                     cout << "AVL: " << (float)time_req_AVL/CLOCKS_PER_SEC << "s" << endl;

@@ -62,7 +62,7 @@ class AVL {
         struct Node* deleteOne(string word);
         struct Node* deleteOne(Node * ptr, string word);
         
-        void lexSort();
+        void lexSort(ofstream &outputFile);
         void lexSort(Node *node, ofstream &outputFile);
         
         std::vector<string> rangeSearch(string begin, string end);

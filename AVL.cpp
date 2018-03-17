@@ -352,12 +352,10 @@ struct AVL::Node* AVL::deleteOne(string word)
     }
 };
 
- void AVL::lexSort() 
- {
-    ofstream outputFile;
-    outputFile.open("avlSorted.txt");
+void AVL::lexSort(std::ofstream &outputFile) 
+{
     lexSort(this->root, outputFile);
-    outputFile.close();
+    
 };
 
 void AVL::lexSort(Node *node, ofstream &outputFile) 
@@ -367,7 +365,7 @@ void AVL::lexSort(Node *node, ofstream &outputFile)
         /* first recur on left child */
         lexSort(node->left, outputFile);
 
-        outputFile << node->word << " ";
+        outputFile << node->word << endl;
         //cout << node->word << "being written." << endl;
         /* now recur on right child */
         lexSort(node->right, outputFile);   
